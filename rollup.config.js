@@ -81,9 +81,9 @@ const serverConfig = {
     }),
   ],
   onwarn: onwarnRollup,
-  external: Object.keys(pkg.dependencies)
-    .concat(Object.keys(pkg.devDependencies))
-    .concat(require('module').builtinModules || Object.keys(process.binding('natives'))),
+  external: Object.keys(pkg.dependencies || {})
+    .concat(Object.keys(pkg.devDependencies || {}))
+    .concat(require('module').builtinModules || Object.keys(process.binding('natives')) || []),
 }
 
 export default [serverConfig]
