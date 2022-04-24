@@ -67,6 +67,19 @@ export function normalizeSimple({
   }
 }
 
+function correctSample(value: number) {
+  if (typeof value !== 'number' || (value === value) === false) {
+    throw new Error('value is NaN')
+  }
+  if (value > 1) {
+    value = 1
+  }
+  if (value < -1) {
+    value = -1
+  }
+  return value
+}
+
 export function normalizeWithWindow({
   samples,
   coef,
@@ -78,12 +91,12 @@ export function normalizeWithWindow({
   maxNoiseRelativeSamples: number,
   windowSamples,
 }) {
-  const windowSamplesHalf = (windowSamples / 2)|0
+  const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const window = new Float32Array(windowSamplesHalf)
   let windowIndex = 0
 
   const channels = samples.channels
-  const len = samples.data.length
+  const len = Math.floor(samples.data.length / channels)
   let max = 0
   let min = 1
   let sum = 0
@@ -99,32 +112,32 @@ export function normalizeWithWindow({
     sum += value
     sumSqr += value * value
     if (windowSamples && i >= windowSamples) {
-      if (i >= windowSamples + windowSamplesHalf) {
-        samples.data[i - windowSamples - 1] = window[windowIndex]
+      if (i > windowSamples) {
+        samples.data[(i - windowSamples - 1) * channels + 0] = correctSample(window[windowIndex])
       }
 
       const prevValue = samples.data[(i - windowSamples) * channels + 0]
-      const middleValue = samples.data[(i - windowSamplesHalf) * channels + 0]
+      const middleValue = samples.data[(i - windowSamples + windowSamplesHalf) * channels + 0]
 
       const avg = sum / windowSamples
       sum -= prevValue
       sumSqr -= prevValue * prevValue
       const delta = calcDelta(windowSamples, sum, sumSqr, 1 - maxNoiseRelativeSamples)
       const offset = -avg
-      const mult = coef / delta
+      const mult = delta === 0 ? 1 : coef / delta
 
       if (i === windowSamples) {
         for (let j = 0; j < windowSamples; j++) {
-          window[j] = (samples.data[j] + offset) * mult
+          window[j] = correctSample((samples.data[j * channels + 0] + offset) * mult)
         }
       } else if (i === len - 1) {
         for (let j = len - windowSamples; j < len; j++) {
-          samples.data[j] = (samples.data[j] + offset) * mult
+          samples.data[j * channels + 0] = correctSample((samples.data[j * channels + 0] + offset) * mult)
         }
       } else {
-        window[windowIndex] = (middleValue + offset) * mult
+        window[windowIndex] = correctSample((middleValue + offset) * mult)
         windowIndex++
-        if (windowIndex > windowSamples) {
+        if (windowIndex >= windowSamplesHalf) {
           windowIndex = 0
         }
       }
