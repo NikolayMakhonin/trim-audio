@@ -1,0 +1,25 @@
+{
+  "name": "@flemist/trim-audio",
+  "version": "0.0.1",
+  "description": "Normalize and trim audio in Float32Array format",
+  "main": "dist/index.cjs",
+  "scripts": {
+    "test": "mocha ./src/**/*.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NikolayMakhonin/trim-audio.git"
+  },
+  "keywords": [
+    "trim",
+    "audio",
+    "normalize",
+    "Float32Array"
+  ],
+  "author": "Nikolay Makhonin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NikolayMakhonin/trim-audio/issues"
+  },
+  "homepage": "https://github.com/NikolayMakhonin/trim-audio#readme"
+}
