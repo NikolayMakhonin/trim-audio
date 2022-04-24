@@ -6,7 +6,8 @@ export async function saveTempFileMp3(fileName: string, samples: AudioSamples) {
     outputFormat: 'mp3', // same as file extension
     // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
     params      : ffmpegEncodeMp3Params({
-      mode       : 'vbr',
+      bitrate    : 320,
+      mode       : 'cbr',
       vbrQuality : 0,
       jointStereo: true,
     }),

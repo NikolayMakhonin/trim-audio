@@ -807,6 +807,17 @@
     "@stdlib/complex-reimf" "^0.0.x"
     "@stdlib/utils-library-manifest" "^0.0.x"
 
+"@stdlib/math-base-special-erfcinv@^0.0.6":
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/@stdlib/math-base-special-erfcinv/-/math-base-special-erfcinv-0.0.6.tgz#d02b02f841d9a6a9f830912327acd00a3fb9cf0a"
+  integrity sha512-OBXoR771SxlJarOARcvEIcIlMTCdEsR0wg20oHZO/vvLNwB8znMCC2ZGC76jzqBVlo41V2p34L2FPjLJfwJeXQ==
+  dependencies:
+    "@stdlib/constants-float64-ninf" "^0.0.x"
+    "@stdlib/constants-float64-pinf" "^0.0.x"
+    "@stdlib/math-base-assert-is-nan" "^0.0.x"
+    "@stdlib/math-base-special-ln" "^0.0.x"
+    "@stdlib/math-base-special-sqrt" "^0.0.x"
+
 "@stdlib/math-base-special-erfinv@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@stdlib/math-base-special-erfinv/-/math-base-special-erfinv-0.0.6.tgz#96905a66a3b7b6d8ab9de788fa173ee78bb1d820"

@@ -1,15 +1,19 @@
 import {AudioSamples} from './contracts'
-import erfinv from '@stdlib/math-base-special-erfinv'
+import erfcinv from '@stdlib/math-base-special-erfcinv'
 
 export const SILENCE_LEVEL_START_DEFAULT = -1.1 // use -1.5 for 'ф..'
 export const SILENCE_LEVEL_END_DEFAULT = -2
 
-function calcDelta(count, sum, sumSqr, probability) {
-  // const avg = sum / count
-  // const dispersion = (sumSqr / count - avg * avg) * count / (count - 1)
-  const dispersion = (sumSqr - sum * sum / count) / (count - 1)
+function calcStandardDeviation(count: number, sum: number, sumSqr: number) {
+  const avg = sum / count
+  const dispersion = (sumSqr / count - avg * avg) * count / (count - 1)
+  // const dispersion = (sumSqr - sum * sum / count) / (count - 1)
   const standardDeviation = Math.sqrt(dispersion)
 
+  return standardDeviation
+}
+
+function calcDelta(outsideProbability: number) {
   // F(x) = 1 + erf((x - avg) / (standardDeviation * (2 ** 0.5)))
   // 1 - F(x) = erf
   // erfinv(1 - F(x)) = (x - avg) / (standardDeviation * (2 ** 0.5))
@@ -17,7 +21,7 @@ function calcDelta(count, sum, sumSqr, probability) {
   // x = erfinv(1 - F(x)) * standardDeviation * (2 ** 0.5) + avg
   // deltaSD = erfinv(1 - F(x)) * (2 ** 0.5)
   // deltaSD = erfcinv(noiseLevel) * (2 ** 0.5)
-  const delta = erfinv(probability) * (2 ** 0.5) * standardDeviation
+  const delta = erfcinv(outsideProbability) * (2 ** 0.5)
   return delta
 }
 
@@ -47,9 +51,12 @@ export function normalizeSimple({
     sumSqr += value * value
   }
 
+  const deltaBase = calcDelta(maxNoiseRelativeSamples)
+
   const avg = sum / len
   if (len > 30 && maxNoiseRelativeSamples && maxNoiseRelativeSamples < 1) {
-    const delta = calcDelta(len, sum, sumSqr, 1 - maxNoiseRelativeSamples)
+    const standardDeviation = calcStandardDeviation(len, sum, sumSqr)
+    const delta = deltaBase * standardDeviation
     const statMin = avg - delta
     const statMax = avg + delta
     if (statMin > min) {
@@ -91,6 +98,13 @@ export function normalizeWithWindow({
   maxNoiseRelativeSamples: number,
   windowSamples,
 }) {
+  const deltaBase = calcDelta(maxNoiseRelativeSamples)
+  const deltaBase2 = 1 / calcStandardDeviation(
+    windowSamples,
+    0,
+    windowSamples * maxNoiseRelativeSamples,
+  )
+
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const window = new Float32Array(windowSamplesHalf)
   let windowIndex = 0
@@ -102,7 +116,11 @@ export function normalizeWithWindow({
   let sum = 0
   let sumSqr = 0
   for (let i = 0; i < len; i++) {
+    if (i === 178300) {
+      Date.now()
+    }
     const value = samples.data[i * channels + 0]
+    samples.data[i * channels + 1] = value
     if (value > max) {
       max = value
     }
@@ -122,7 +140,8 @@ export function normalizeWithWindow({
       const avg = sum / windowSamples
       sum -= prevValue
       sumSqr -= prevValue * prevValue
-      const delta = calcDelta(windowSamples, sum, sumSqr, 1 - maxNoiseRelativeSamples)
+      const standardDeviation = calcStandardDeviation(windowSamples, sum, sumSqr < 0 ? 0 : sumSqr)
+      const delta = 37.93681320481474 * deltaBase * standardDeviation
       const offset = -avg
       const mult = delta === 0 ? 1 : coef / delta
 
