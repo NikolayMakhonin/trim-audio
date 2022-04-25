@@ -120,8 +120,8 @@ export function normalizeWithWindow({
       const mult = _max - _min < EPSILON ? 1 : coef * 2 / (_max - _min)
       const index = (i - windowSamples2 + j) * channels
       const value = samples.data[index]
-      samples.data[index] = correctSample((value + offset) * mult)
-      samples.data[index + 1] = _max // index % 20 < 10 ? _min : _max
+      samples.data[index] = correctSample(((value - _min) / (_max - _min) * 2 - 1) * coef)
+      samples.data[index + 1] = (_min + _max) // index % 20 < 10 ? _min : _max
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
     maxJ = Math.min(_windowSamplesHalf, len - i + windowSamples2 - windowSamplesHalf)
@@ -132,8 +132,8 @@ export function normalizeWithWindow({
       const mult = _max - _min < EPSILON ? 1 : coef * 2 / (_max - _min)
       const index = (i - windowSamples2 + j + windowSamplesHalf) * channels
       const value = samples.data[index]
-      samples.data[index] = correctSample((value + offset) * mult)
-      samples.data[index + 1] = _max // index % 20 < 10 ? _min : _max
+      samples.data[index] = correctSample(((value - _min) / (_max - _min) * 2 - 1) * coef)
+      samples.data[index + 1] = (_min + _max) // index % 20 < 10 ? _min : _max
     }
   }
 
