@@ -27,27 +27,24 @@ describe('node > trim', function () {
 	it('normalizeWithWindow silence 0', function () {
 		testSilence(0, samples => normalizeWithWindow({
 			samples,
-			coef                   : 0.95,
-			maxNoiseRelativeSamples: 0.05,
-			windowSamples          : 2, // samples.sampleRate * 0.5,
+			coef         : 0.95,
+			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
 	})
 
 	it('normalizeWithWindow silence 1', function () {
 		testSilence(0, samples => normalizeWithWindow({
 			samples,
-			coef                   : 0.95,
-			maxNoiseRelativeSamples: 0.05,
-			windowSamples          : 2, // samples.sampleRate * 0.5,
+			coef         : 0.95,
+			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
 	})
 
 	it('normalizeWithWindow silence -1', function () {
 		testSilence(0, samples => normalizeWithWindow({
 			samples,
-			coef                   : 0.95,
-			maxNoiseRelativeSamples: 0.0001,
-			windowSamples          : 2, // samples.sampleRate * 0.5,
+			coef         : 0.95,
+			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
 	})
 
@@ -76,9 +73,8 @@ describe('node > trim', function () {
 
 		normalizeWithWindow({
 			samples,
-			coef                   : 1,
-			maxNoiseRelativeSamples: 200 / (samples.sampleRate * 0.5),
-			windowSamples          : samples.sampleRate * 0.5,
+			coef         : 1,
+			windowSamples: samples.sampleRate * 0.5,
 		})
 		
 		await saveTempFileMp3('simple.mp3', samples)
@@ -88,9 +84,8 @@ describe('node > trim', function () {
 		const samples = await loadAssetAudio('word.mp3')
 		normalizeWithWindow({
 			samples,
-			coef                   : 1,
-			maxNoiseRelativeSamples: 50 / (samples.sampleRate * 0.5),
-			windowSamples          : samples.sampleRate * 0.5,
+			coef         : 1,
+			windowSamples: samples.sampleRate * 0.5,
 		})
 		await saveTempFileMp3('word.mp3', samples)
 	})

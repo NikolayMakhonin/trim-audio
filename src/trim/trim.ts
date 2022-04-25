@@ -90,78 +90,85 @@ function correctSample(value: number) {
 export function normalizeWithWindow({
   samples,
   coef,
-  maxNoiseRelativeSamples,
   windowSamples,
 }: {
   samples: AudioSamples,
   coef: number,
-  maxNoiseRelativeSamples: number,
   windowSamples,
 }) {
-  const deltaBase = calcDelta(maxNoiseRelativeSamples)
-  const deltaBase2 = 1 / calcStandardDeviation(
-    windowSamples,
-    0,
-    windowSamples * maxNoiseRelativeSamples,
-  )
-
+  const EPSILON = 1e-16
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
-  const window = new Float32Array(windowSamplesHalf)
-  let windowIndex = 0
+  const windowSamples2 = windowSamples * 2
 
   const channels = samples.channels
   const len = Math.floor(samples.data.length / channels)
-  let max = 0
+  let maxPrev = -1
+  let minPrev = 1
+  let max = -1
   let min = 1
-  let sum = 0
-  let sumSqr = 0
-  for (let i = 0; i < len; i++) {
-    if (i === 178300) {
-      Date.now()
-    }
-    const value = samples.data[i * channels + 0]
-    samples.data[i * channels + 1] = value
-    if (value > max) {
-      max = value
-    }
-    if (value < min) {
-      min = value
-    }
-    sum += value
-    sumSqr += value * value
-    if (windowSamples && i >= windowSamples) {
-      if (i > windowSamples) {
-        samples.data[(i - windowSamples - 1) * channels + 0] = correctSample(window[windowIndex])
-      }
+  let maxNext = -1
+  let minNext = 1
 
-      const prevValue = samples.data[(i - windowSamples) * channels + 0]
-      const middleValue = samples.data[(i - windowSamples + windowSamplesHalf) * channels + 0]
-
-      const avg = sum / windowSamples
-      sum -= prevValue
-      sumSqr -= prevValue * prevValue
-      const standardDeviation = calcStandardDeviation(windowSamples, sum, sumSqr < 0 ? 0 : sumSqr)
-      const delta = 37.93681320481474 * deltaBase * standardDeviation
-      const offset = -avg
-      const mult = delta === 0 ? 1 : coef / delta
-
-      if (i === windowSamples) {
-        for (let j = 0; j < windowSamples; j++) {
-          window[j] = correctSample((samples.data[j * channels + 0] + offset) * mult)
-        }
-      } else if (i === len - 1) {
-        for (let j = len - windowSamples; j < len; j++) {
-          samples.data[j * channels + 0] = correctSample((samples.data[j * channels + 0] + offset) * mult)
-        }
-      } else {
-        window[windowIndex] = correctSample((middleValue + offset) * mult)
-        windowIndex++
-        if (windowIndex >= windowSamplesHalf) {
-          windowIndex = 0
-        }
-      }
+  function _normalize(i: number) {
+    // const _offset = -(min + max) / 2
+    // const _mult = max - min < EPSILON ? 1 : coef / (max - min)
+    let maxJ = Math.min(windowSamplesHalf, len - i + windowSamples2)
+    for (let j = 0; j < maxJ; j++) {
+      const _min = minPrev < min ? minPrev + (min - minPrev) * j / windowSamplesHalf : min
+      const _max = maxPrev > max ? maxPrev + (max - maxPrev) * j / windowSamplesHalf : max
+      const offset = -(_min + _max) / 2
+      const mult = _max - _min < EPSILON ? 1 : coef / (_max - _min)
+      const index = (i - windowSamples2 + j) * channels
+      const value = samples.data[index]
+      samples.data[index] = correctSample((value + offset) * mult)
+      samples.data[index + 1] = index % 20 < 10 ? _min : _max
+    }
+    const _windowSamplesHalf = windowSamples - windowSamplesHalf
+    maxJ = Math.min(_windowSamplesHalf, len - i + windowSamples2 - windowSamplesHalf)
+    for (let j = 0; j < maxJ; j++) {
+      const _min = minNext < min ? min + (minNext - min) * j / _windowSamplesHalf : min
+      const _max = maxNext > max ? max + (maxNext - max) * j / _windowSamplesHalf : max
+      const offset = -(_min + _max) / 2
+      const mult = _max - _min < EPSILON ? 1 : coef / (_max - _min)
+      const index = (i - windowSamples2 + j + windowSamplesHalf) * channels
+      const value = samples.data[index]
+      samples.data[index] = correctSample((value + offset) * mult)
+      samples.data[index + 1] = index % 20 < 10 ? _min : _max
     }
   }
+
+  for (let i = 0; i < len; i++) {
+    if (i >= windowSamples2 && i % windowSamples === 0) {
+      _normalize(i)
+    }
+    if (i % windowSamples === 0) {
+      minPrev = min
+      maxPrev = max
+      min = minNext
+      max = maxNext
+      minNext = 1
+      maxNext = -1
+    }
+    const indexNext = i * channels
+    const valueNext = samples.data[indexNext]
+    samples.data[indexNext + 1] = valueNext
+    if (valueNext > maxNext) {
+      maxNext = valueNext
+    }
+    if (valueNext < minNext) {
+      minNext = valueNext
+    }
+  }
+
+  const i = Math.ceil(len / windowSamples) * windowSamples
+  _normalize(i)
+  minPrev = min
+  maxPrev = max
+  min = minNext
+  max = maxNext
+  minNext = 1
+  maxNext = -1
+  _normalize(i + windowSamples)
 }
 
 // export function trimSamples({
