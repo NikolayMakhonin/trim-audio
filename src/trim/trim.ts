@@ -87,7 +87,56 @@ function correctSample(value: number) {
   return value
 }
 
-export function normalizeWithWindow({
+export function normalizeOffsetWithWindow({
+  samples,
+  windowSamples,
+}: {
+  samples: AudioSamples,
+  windowSamples,
+}) {
+  const windowSamplesHalf = Math.ceil(windowSamples / 2)
+  const window = new Float32Array(windowSamplesHalf)
+  let windowIndex = 0
+
+  const channels = samples.channels
+  const len = Math.floor(samples.data.length / channels)
+  let sum = 0
+  for (let i = 0; i < len; i++) {
+    const value = samples.data[i * channels + 0]
+    samples.data[i * channels + 1] = value
+    sum += value
+    if (windowSamples && i >= windowSamples) {
+      if (i > windowSamples) {
+        samples.data[(i - windowSamples - 1) * channels + 0] = correctSample(window[windowIndex])
+      }
+
+      const prevValue = samples.data[(i - windowSamples) * channels + 0]
+      const middleValue = samples.data[(i - windowSamples + windowSamplesHalf) * channels + 0]
+
+      const avg = sum / windowSamples
+      sum -= prevValue
+      const offset = -avg
+
+      if (i === windowSamples) {
+        for (let j = 0; j < windowSamples; j++) {
+          window[j] = correctSample((samples.data[j * channels + 0] + offset))
+        }
+      } else if (i === len - 1) {
+        for (let j = len - windowSamples; j < len; j++) {
+          samples.data[j * channels + 0] = correctSample((samples.data[j * channels + 0] + offset))
+        }
+      } else {
+        window[windowIndex] = correctSample((middleValue + offset))
+        windowIndex++
+        if (windowIndex >= windowSamplesHalf) {
+          windowIndex = 0
+        }
+      }
+    }
+  }
+}
+
+export function normalizeAmplitudeWithWindow({
   samples,
   coef,
   windowSamples,

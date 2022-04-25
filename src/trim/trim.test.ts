@@ -1,5 +1,5 @@
 import {loadAssetAudio} from './test/loadAssetAudio'
-import {normalizeWithWindow} from './trim'
+import {normalizeOffsetWithWindow, normalizeAmplitudeWithWindow} from './trim'
 import {saveTempFileMp3} from './test/saveTempFileMp3'
 import {AudioSamples} from '@flemist/ffmpeg-encode-decode'
 
@@ -25,7 +25,7 @@ describe('node > trim', function () {
 	}
 
 	it('normalizeWithWindow silence 0', function () {
-		testSilence(0, samples => normalizeWithWindow({
+		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
@@ -33,7 +33,7 @@ describe('node > trim', function () {
 	})
 
 	it('normalizeWithWindow silence 1', function () {
-		testSilence(0, samples => normalizeWithWindow({
+		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
@@ -41,7 +41,7 @@ describe('node > trim', function () {
 	})
 
 	it('normalizeWithWindow silence -1', function () {
-		testSilence(0, samples => normalizeWithWindow({
+		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
@@ -71,7 +71,7 @@ describe('node > trim', function () {
 		samples.data[2] = -1
 		samples.data[3] = -1
 
-		normalizeWithWindow({
+		normalizeAmplitudeWithWindow({
 			samples,
 			coef         : 1,
 			windowSamples: samples.sampleRate * 0.5,
@@ -82,11 +82,26 @@ describe('node > trim', function () {
 	
 	it('normalizeWithWindow', async function () {
 		const samples = await loadAssetAudio('word.mp3')
-		normalizeWithWindow({
+		normalizeAmplitudeWithWindow({
 			samples,
 			coef         : 1,
 			windowSamples: samples.sampleRate * 0.5,
 		})
+		normalizeOffsetWithWindow({
+			samples,
+			windowSamples: samples.sampleRate * 0.1,
+		})
+
+		// const samples:AudioSamples = {
+		// 	data      : new Float32Array(44100 * 2 * 5),
+		// 	channels  : 2,
+		// 	sampleRate: 8000,
+		// }
+		//
+		// for (let i = 0; i < samples.data.length; i++) {
+		// 	samples.data[i] = 0.01
+		// }
+
 		await saveTempFileMp3('word.mp3', samples)
 	})
 })
