@@ -25,55 +25,6 @@ function calcDelta(outsideProbability: number) {
   return delta
 }
 
-export function normalizeSimple({
-  samples,
-  coef,
-  maxNoiseRelativeSamples,
-}: {
-  samples: AudioSamples,
-  coef: number,
-  maxNoiseRelativeSamples: number,
-}) {
-  const len = samples.data.length
-  let max = 0
-  let min = 1
-  let sum = 0
-  let sumSqr = 0
-  for (let i = 0; i < len; i++) {
-    const value = samples.data[i]
-    if (value > max) {
-      max = value
-    }
-    if (value < min) {
-      min = value
-    }
-    sum += value
-    sumSqr += value * value
-  }
-
-  const deltaBase = calcDelta(maxNoiseRelativeSamples)
-
-  const avg = sum / len
-  if (len > 30 && maxNoiseRelativeSamples && maxNoiseRelativeSamples < 1) {
-    const standardDeviation = calcStandardDeviation(len, sum, sumSqr)
-    const delta = deltaBase * standardDeviation
-    const statMin = avg - delta
-    const statMax = avg + delta
-    if (statMin > min) {
-      min = statMin
-    }
-    if (statMax < max) {
-      max = statMax
-    }
-  }
-
-  const offset = -avg
-  const mult = coef / Math.max(max + offset, -(min + offset))
-  for (let i = 0; i < len; i++) {
-    samples.data[i] = (samples.data[i] + offset) * mult
-  }
-}
-
 function correctSample(value: number) {
   if (typeof value !== 'number' || (value === value) === false) {
     throw new Error('value is NaN')
@@ -85,6 +36,19 @@ function correctSample(value: number) {
     value = -1
   }
   return value
+}
+
+export function multAmplitude({
+  samples,
+  mult,
+}: {
+  samples: AudioSamples,
+  mult: number,
+}) {
+  const len = Math.floor(samples.data.length / samples.channels)
+  for (let i = 0; i < len; i++) {
+    samples.data[i] *= mult
+  }
 }
 
 export function normalizeOffsetWithWindow({
@@ -100,11 +64,16 @@ export function normalizeOffsetWithWindow({
 
   const channels = samples.channels
   const len = Math.floor(samples.data.length / channels)
+  let max = 0
   let sum = 0
   for (let i = 0; i < len; i++) {
     const value = samples.data[i * channels + 0]
     samples.data[i * channels + 1] = value
     sum += value
+    const valueAbs = Math.abs(value)
+    if (valueAbs > max) {
+      max = valueAbs
+    }
     if (windowSamples && i >= windowSamples) {
       if (i > windowSamples) {
         samples.data[(i - windowSamples - 1) * channels + 0] = correctSample(window[windowIndex])
@@ -134,6 +103,8 @@ export function normalizeOffsetWithWindow({
       }
     }
   }
+
+  return max
 }
 
 export function normalizeAmplitudeWithWindow({
@@ -151,38 +122,29 @@ export function normalizeAmplitudeWithWindow({
 
   const channels = samples.channels
   const len = Math.floor(samples.data.length / channels)
-  let maxPrev = -1
-  let minPrev = 1
-  let max = -1
-  let min = 1
-  let maxNext = -1
-  let minNext = 1
+  let maxPrev = 0
+  let max = 0
+  let maxNext = 0
 
   function _normalize(i: number) {
-    // const _offset = -(min + max) / 2
-    // const _mult = max - min < EPSILON ? 1 : coef / (max - min)
     let maxJ = Math.min(windowSamplesHalf, len - i + windowSamples2)
     for (let j = 0; j < maxJ; j++) {
-      const _min = minPrev < min ? minPrev + (min - minPrev) * j / windowSamplesHalf : min
       const _max = maxPrev > max ? maxPrev + (max - maxPrev) * j / windowSamplesHalf : max
-      const offset = -(_min + _max) / 2
-      const mult = _max - _min < EPSILON ? 1 : coef * 2 / (_max - _min)
+      const mult = _max < EPSILON ? 1 : coef / _max
       const index = (i - windowSamples2 + j) * channels
       const value = samples.data[index]
-      samples.data[index] = correctSample(((value - _min) / (_max - _min) * 2 - 1) * coef)
-      samples.data[index + 1] = (_min + _max) // index % 20 < 10 ? _min : _max
+      samples.data[index] = correctSample(value * mult)
+      samples.data[index + 1] = _max
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
     maxJ = Math.min(_windowSamplesHalf, len - i + windowSamples2 - windowSamplesHalf)
     for (let j = 0; j < maxJ; j++) {
-      const _min = minNext < min ? min + (minNext - min) * j / _windowSamplesHalf : min
       const _max = maxNext > max ? max + (maxNext - max) * j / _windowSamplesHalf : max
-      const offset = -(_min + _max) / 2
-      const mult = _max - _min < EPSILON ? 1 : coef * 2 / (_max - _min)
+      const mult = _max < EPSILON ? 1 : coef / _max
       const index = (i - windowSamples2 + j + windowSamplesHalf) * channels
       const value = samples.data[index]
-      samples.data[index] = correctSample(((value - _min) / (_max - _min) * 2 - 1) * coef)
-      samples.data[index + 1] = (_min + _max) // index % 20 < 10 ? _min : _max
+      samples.data[index] = correctSample(value * mult)
+      samples.data[index + 1] = _max
     }
   }
 
@@ -191,32 +153,24 @@ export function normalizeAmplitudeWithWindow({
       _normalize(i)
     }
     if (i % windowSamples === 0) {
-      minPrev = min
       maxPrev = max
-      min = minNext
       max = maxNext
-      minNext = 1
-      maxNext = -1
+      maxNext = 0
     }
     const indexNext = i * channels
     const valueNext = samples.data[indexNext]
     samples.data[indexNext + 1] = valueNext
-    if (valueNext > maxNext) {
-      maxNext = valueNext
-    }
-    if (valueNext < minNext) {
-      minNext = valueNext
+    const valueNextAbs = Math.abs(valueNext)
+    if (valueNextAbs > maxNext) {
+      maxNext = valueNextAbs
     }
   }
 
   const i = Math.ceil(len / windowSamples) * windowSamples
   _normalize(i)
-  minPrev = min
   maxPrev = max
-  min = minNext
   max = maxNext
-  minNext = 1
-  maxNext = -1
+  maxNext = 0
   _normalize(i + windowSamples)
 }
 

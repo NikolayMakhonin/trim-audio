@@ -1,5 +1,5 @@
 import {loadAssetAudio} from './test/loadAssetAudio'
-import {normalizeOffsetWithWindow, normalizeAmplitudeWithWindow} from './trim'
+import {normalizeOffsetWithWindow, normalizeAmplitudeWithWindow, multAmplitude} from './trim'
 import {saveTempFileMp3} from './test/saveTempFileMp3'
 import {AudioSamples} from '@flemist/ffmpeg-encode-decode'
 
@@ -82,15 +82,21 @@ describe('node > trim', function () {
 	
 	it('normalizeWithWindow', async function () {
 		const samples = await loadAssetAudio('word.mp3')
-		normalizeAmplitudeWithWindow({
-			samples,
-			coef         : 1,
-			windowSamples: samples.sampleRate * 0.5,
-		})
-		normalizeOffsetWithWindow({
+		const max = normalizeOffsetWithWindow({
 			samples,
 			windowSamples: samples.sampleRate * 0.1,
 		})
+		if (max > 0) {
+			multAmplitude({
+				samples,
+				mult: 1 / max,
+			})
+			normalizeAmplitudeWithWindow({
+				samples,
+				coef         : 1,
+				windowSamples: samples.sampleRate * 0.5,
+			})
+		}
 
 		// const samples:AudioSamples = {
 		// 	data      : new Float32Array(44100 * 2 * 5),
