@@ -27,7 +27,6 @@ describe('node > trim', function () {
 	it('normalizeWithWindow silence 0', function () {
 		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
-			channel: 0,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
@@ -36,7 +35,6 @@ describe('node > trim', function () {
 	it('normalizeWithWindow silence 1', function () {
 		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
-			channel: 0,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
@@ -45,7 +43,6 @@ describe('node > trim', function () {
 	it('normalizeWithWindow silence -1', function () {
 		testSilence(0, samples => normalizeAmplitudeWithWindow({
 			samples,
-			channel: 0,
 			coef         : 0.95,
 			windowSamples: 2, // samples.sampleRate * 0.5,
 		}))
@@ -76,7 +73,6 @@ describe('node > trim', function () {
 
 		normalizeAmplitudeWithWindow({
 			samples,
-			channel: 0,
 			coef         : 1,
 			windowSamples: samples.sampleRate * 0.5,
 		})
@@ -85,22 +81,21 @@ describe('node > trim', function () {
 	})
 	
 	it('normalizeWithWindow', async function () {
-		const samples = await loadAssetAudio('word.mp3')
+		const samples = await loadAssetAudio('word2.mp3')
 		normalizeOffsetWithWindow({
 			samples,
-			channel      : 0,
 			windowSamples: samples.sampleRate * 0.1,
 		})
-		normalizeAmplitudeSimple({
-			samples,
-			channel: 0,
-			coef   : 1,
-		})
+		// normalizeAmplitudeSimple({
+		// 	samples,
+		// 	coef            : 1,
+		// 	separateChannels: true,
+		// })
 		normalizeAmplitudeWithWindow({
 			samples,
-			channel      : 0,
-			coef         : 1,
-			windowSamples: samples.sampleRate * 0.5,
+			coef            : 1,
+			windowSamples   : samples.sampleRate * 0.5,
+			separateChannels: true,
 		})
 
 		// const samples:AudioSamples = {
