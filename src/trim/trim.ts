@@ -448,9 +448,6 @@ export function trimAudio({
   end,
 }: {
   samples: AudioSamples,
-  silenceLevelStart: number,
-  silenceLevelEnd: number,
-  minSilenceSamples: number,
   windowSamples: number,
   start: {
     minContentSamples: number,
