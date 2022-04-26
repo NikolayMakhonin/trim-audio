@@ -190,7 +190,7 @@ export function normalizeOffsetWithWindow({
 }: {
   samples: AudioSamples,
   channels?: number[],
-  windowSamples,
+  windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const window = new Float32Array(windowSamplesHalf)
@@ -258,7 +258,7 @@ function _normalizeAmplitudeWithWindow({
   samples: AudioSamples,
   channels?: number[],
   coef: number,
-  windowSamples,
+  windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
@@ -288,7 +288,7 @@ function _normalizeAmplitudeWithWindow({
       for (let nChannel = 0; nChannel < channelsCount; nChannel++) {
         const channel = channels[nChannel]
         const value = samples.data[index + channel]
-        samples.data[index + channel] = correctSample(value * mult)
+        samples.data[index + channel] = (value * mult)
       }
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
@@ -344,7 +344,7 @@ export function normalizeAmplitudeWithWindow({
   channels?: number[],
   separateChannels?: boolean,
   coef: number,
-  windowSamples,
+  windowSamples: number,
 }) {
   const channelsTotal = samples.channels
 
@@ -375,6 +375,159 @@ export function normalizeAmplitudeWithWindow({
     coef,
     windowSamples,
   })
+}
+
+function searchContent(
+  samplesData: Float32Array,
+  samplesCount: number,
+  channelsCount: number,
+  channel: number,
+  windowSamples: number,
+  backward: boolean,
+  minContentSamples: number,
+  minContentDispersion: number,
+  maxSilenceSamples: number,
+) {
+  let contentStartIndex = 0
+  let contentStartEnd = 0
+
+  let sum = 0
+  let sumSqr = 0
+
+  for (let i = 0; i < samplesCount; i++) {
+    const index = (backward ? samplesCount - 1 - i : i) * channelsCount + channel
+    const value = samplesData[index]
+    sum += value
+    sumSqr += value * value
+    if (i >= windowSamples) {
+      const prevIndex = (
+        backward
+          ? samplesCount - 1 - (i - windowSamples)
+          : (i - windowSamples)
+      ) * channelsCount + channel
+      const prevValue = samplesData[prevIndex]
+      sum -= prevValue
+      sumSqr -= prevValue * prevValue
+
+      const avg = sum / windowSamples
+      const sqrAvg = sumSqr / windowSamples
+      const dispersion = (sqrAvg - avg * avg) * windowSamples / (windowSamples - 1)
+
+      if (dispersion > minContentDispersion) {
+        if (contentStartEnd === 0) {
+          contentStartIndex = i - windowSamples
+        }
+        contentStartEnd = i
+        if (i - contentStartIndex > minContentSamples) {
+          return backward
+            ? samplesCount - 1 - contentStartIndex
+            : contentStartIndex
+        }
+      } else if (i - contentStartEnd > maxSilenceSamples) {
+        contentStartEnd = 0
+      }
+    }
+  }
+
+  if (contentStartEnd === 0) {
+    return backward ? samplesCount : 0
+  }
+
+  return backward
+    ? samplesCount - 1 - contentStartIndex
+    : contentStartIndex
+}
+
+export function trimAudio({
+  samples,
+  silenceLevelStart,
+  silenceLevelEnd,
+  minSilenceSamples,
+  windowSamples,
+  start,
+  end,
+}: {
+  samples: AudioSamples,
+  silenceLevelStart: number,
+  silenceLevelEnd: number,
+  minSilenceSamples: number,
+  windowSamples: number,
+  start: {
+    minContentSamples: number,
+    minContentDecibel: number,
+    maxSilenceSamples: number,
+  },
+  end: {
+    minContentSamples: number,
+    minContentDecibel: number,
+    maxSilenceSamples: number,
+  },
+}) {
+  const channelsCount = samples.channels
+  const samplesData = samples.data
+  const samplesCount = Math.floor(samplesData.length / channelsCount)
+
+  function calcMinDispersion(silenceLevel: number) {
+    const result = 10 ** silenceLevel
+    return result * result
+  }
+
+  const minContentDispersionStart = start && calcMinDispersion(start.minContentDecibel)
+  const minContentDispersionEnd = end && calcMinDispersion(end.minContentDecibel)
+
+  let trimStartMin = 0
+  let trimEndMax = samplesCount
+
+  for (let channel = 0; channel < channelsCount; channel++) {
+    const trimStart = !start ? 0 : searchContent(
+      samplesData,
+      samplesCount,
+      channelsCount,
+      channel,
+      windowSamples,
+      false,
+      start.minContentSamples,
+      minContentDispersionStart,
+      start.maxSilenceSamples,
+    )
+
+    const trimEnd = !end ? samplesCount - 1 : searchContent(
+      samplesData,
+      Math.min(samplesCount, samplesCount - trimStart + windowSamples),
+      channelsCount,
+      channel,
+      windowSamples,
+      true,
+      end.minContentSamples,
+      minContentDispersionEnd,
+      end.maxSilenceSamples,
+    )
+
+    if (trimStart < trimStartMin) {
+      trimStartMin = trimStart
+    }
+    if (trimEnd > trimEndMax) {
+      trimEndMax = trimEnd
+    }
+  }
+
+  samples.data = new Float32Array(
+    samplesData.buffer,
+    trimStartMin * channelsCount,
+    trimEndMax * channelsCount,
+  )
+
+  // Amplify
+  // if (from != null) {
+  //   for (let i = 0; i < minSilenceSamples; i++) {
+  //     samples[i] *= (i / minSilenceSamples)
+  //   }
+  // }
+  // if (to != null) {
+  //   for (let i = 0; i < minSilenceSamples; i++) {
+  //     samples[len - i - 1] *= (i / minSilenceSamples)
+  //   }
+  // }
 }
 
 // export function trimSamples({
@@ -413,7 +566,7 @@ export function normalizeAmplitudeWithWindow({
 //         backward
 //           ? len - i - 1
 //           : i
-//         ]
+//       ]
 //
 //       sum += value
 //       sumSqr += value * value
@@ -422,7 +575,7 @@ export function normalizeAmplitudeWithWindow({
 //           backward
 //             ? len - (i - minSilenceSamples) - 1
 //             : i - minSilenceSamples
-//           ]
+//         ]
 //         sum -= prevValue
 //         sumSqr -= prevValue * prevValue
 //
