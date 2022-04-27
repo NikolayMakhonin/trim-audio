@@ -1,7 +1,9 @@
 import {loadAssetAudio} from './test/loadAssetAudio'
-import {normalizeOffsetWithWindow, normalizeAmplitudeWithWindow, normalizeAmplitudeSimple} from './trim'
 import {saveTempFileMp3} from './test/saveTempFileMp3'
 import {AudioSamples} from '@flemist/ffmpeg-encode-decode'
+import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
+import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
+import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 
 describe('node > trim', function () {
 	this.timeout(30000)
