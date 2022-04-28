@@ -59,15 +59,16 @@ describe('node > normalizeAmplitudeSimple', function () {
 	it('normalizeWithWindow silence 0', function () {
 		testVariants({
 			channelsCount: [1, 2, 3],
-			channels: [[1], [0, 1, 2]],
-			coef: [0, 1],
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[1]]
+				: channelsCount === 2 ? [[0, 2]]
+				: [[1, 2], [0, 1, 2]],
+			coef            : [0, 1],
 			separateChannels: [false, true],
 		}, ({channelsCount, channels, coef, separateChannels}) => {
-			if (channels.length )
 			test({
-				samplesCount: 100,
-				channelsCount: 3,
-				fillRanges: [],
+				samplesCount    : 100,
+				channelsCount,
+				fillRanges      : [],
 				amplitudesActual: [0, 0, 0],
 				amplitudesExpect: [0, 0, 0],
 				handle(samplesData, channelsCount, samplesCount) {
@@ -80,7 +81,7 @@ describe('node > normalizeAmplitudeSimple', function () {
 					})
 				},
 			})
-		},
+		})
 	})
 
 	it('normalizeWithWindow silence 0.1', function () {

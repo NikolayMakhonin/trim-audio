@@ -1,13 +1,31 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-export function testVariants<TArgs extends object>(
-  args: { [key in keyof TArgs]: TArgs[key][] | ((args: TArgs) => TArgs[key][]) },
-  test: (args: TArgs) => void,
+
+type Func<This, Args extends any[], Result> = (this: This, ...args: Args) => Result
+
+type ArrayItem<T> = T extends Array<infer T> ? T : never
+
+type ArrayOrFuncItem<T> = T extends Array<infer T> ? T
+  : T extends Func<any, any[], infer T> ? ArrayItem<T>
+    : never
+
+type VariantArgValues<TArgs, T> = T[] | ((args: TArgs) => T[])
+
+type VariantsArgs<TArgs> = {
+  [key in keyof TArgs]: VariantArgValues<TArgs, TArgs[key]>
+}
+
+type VariantsArgsOf<T> =
+  T extends VariantsArgs<infer T> ? T : never
+
+export function testVariants<TArgs extends VariantsArgs<any>>(
+  args: TArgs,
+  test: (args: VariantsArgsOf<TArgs>) => void,
 ) {
   const argsKeys = Object.keys(args)
-  const argsValues = Object.values(args) as TArgs
+  const argsValues = Object.values(args) as any[]
   const argsLength = argsKeys.length
 
-  const variantArgs: TArgs = {} as any
+  const variantArgs: VariantsArgsOf<TArgs> = {} as any
 
   function getArgValues(nArg: number) {
     let argValues = argsValues[nArg]
