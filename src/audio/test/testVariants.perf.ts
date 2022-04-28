@@ -1,12 +1,12 @@
 import { calcPerformance } from 'rdtsc'
-import {testVariants} from './testVariants'
+import {testVariants, testVariants2} from './testVariants'
 
 describe('node > testVariants', function () {
-	this.timeout(30000)
+	this.timeout(300000)
 
-	it('base', function () {
+	it('perf', function () {
 		const result = calcPerformance(
-			10000,
+			100000,
 			() => {
 
 			},
@@ -16,16 +16,16 @@ describe('node > testVariants', function () {
 					['3', '4'],
 					[true, false],
 				], (a: number, b: string, c: boolean) => {
-
+					return a === 1 && b === '4' && c === false
 				})
 			},
 			() => {
-				testVariants([
-					[1, 2],
-					['3', '4'],
-					[true, false],
-				], (a: number, b: string, c: boolean) => {
-
+				testVariants2({
+					a: [1, 2],
+					b: ['3', '4'],
+					c: [true, false],
+				}, ({a, b, c}) => {
+					return a === 1 && b === '4' && c === false
 				})
 			},
 		)
