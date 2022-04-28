@@ -2,6 +2,7 @@
 import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
 import {generateSilence} from './test/generateSamples'
 import {testSamples} from './test/testSamples'
+import {testVariants} from '../test/testVariants'
 
 describe('node > normalizeAmplitudeSimple', function () {
 	this.timeout(30000)
@@ -56,22 +57,30 @@ describe('node > normalizeAmplitudeSimple', function () {
 	}
 
 	it('normalizeWithWindow silence 0', function () {
-		test({
-			samplesCount    : 100,
-			channelsCount   : 3,
-			fillRanges      : [],
-			amplitudesActual: [0, 0, 0],
-			amplitudesExpect: [0, 0, 0],
-			handle(samplesData, channelsCount, samplesCount) {
-				normalizeAmplitudeSimple({
-					samplesData,
-					channelsCount,
-					channels        : [0, 1, 2],
-					coef            : 0.5,
-					separateChannels: false,
-				})
-			},
-		})
+		testVariants({
+			channelsCount: [1, 2, 3],
+			channels: [[1], [0, 1, 2]],
+			coef: [0, 1],
+			separateChannels: [false, true],
+		}, ({channelsCount, channels, coef, separateChannels}) => {
+			if (channels.length )
+			test({
+				samplesCount: 100,
+				channelsCount: 3,
+				fillRanges: [],
+				amplitudesActual: [0, 0, 0],
+				amplitudesExpect: [0, 0, 0],
+				handle(samplesData, channelsCount, samplesCount) {
+					normalizeAmplitudeSimple({
+						samplesData,
+						channelsCount,
+						channels,
+						coef,
+						separateChannels,
+					})
+				},
+			})
+		},
 	})
 
 	it('normalizeWithWindow silence 0.1', function () {
