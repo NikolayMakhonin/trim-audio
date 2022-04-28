@@ -68,7 +68,7 @@ describe('node > normalizeAmplitudeSimple', function () {
 			test({
 				samplesCount    : 100,
 				channelsCount,
-				fillRanges      : [],
+				fillRanges      : [[0, 1]],
 				amplitudesActual: [0, 0, 0],
 				amplitudesExpect: [0, 0, 0],
 				handle(samplesData, channelsCount, samplesCount) {
