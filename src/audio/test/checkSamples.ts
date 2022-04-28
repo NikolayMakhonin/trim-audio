@@ -1,4 +1,5 @@
 import {AudioSamples} from '../contracts'
+import {EPSILON} from '../helpers'
 
 export function getFirstMaximum({
   getSample,
@@ -46,44 +47,39 @@ export function getFirstMaximum({
 }
 
 export function checkSamples({
-  samples,
-  checkAudioFunc,
-  checkAudioDurationSec,
-  offsetSamples,
-  isMono,
-  multAmplitude,
+  actual,
+  expect,
+  maxDiff,
 }: {
-  samples: AudioSamples,
-  checkAudioFunc: (sampleIndex: number, channel: number) => number,
-  checkAudioDurationSec: number,
-  offsetSamples?: number,
-  isMono?: boolean,
-  minAmplitude?: number,
+  actual: {
+    samplesData: Float32Array,
+    channelsCount: number,
+  },
+  expect: {
+    samplesData: Float32Array,
+    channelsCount: number,
+  },
+  maxDiff?: number,
 }) {
-  assert.strictEqual(samples.data.length % samples.channels, 0)
-  const samplesCount = samples.data.length / samples.channels
+  assert.strictEqual(expect.samplesData.length % expect.channelsCount, 0)
+  assert.strictEqual(actual.channelsCount, expect.channelsCount)
+  assert.strictEqual(actual.samplesData.length, expect.samplesData.length)
+  const channelsCount = expect.channelsCount
+  const samplesCount = expect.samplesData.length / expect.channelsCount
 
-  const sampleRate = samples.sampleRate
+  if (!maxDiff) {
+    maxDiff = EPSILON
+  }
 
-  const totalDuration = (samplesCount - offsetSamples) / samples.sampleRate
-  assert.ok(totalDuration >= checkAudioDurationSec - 0.05, totalDuration + '')
-  assert.ok(totalDuration <= checkAudioDurationSec + 0.05, totalDuration + '')
-
-  for (let channel = 0; channel < samples.channels; channel++) {
-    let sumError = 0
-    for (let i = offsetSamples; i < samplesCount; i++) {
-      const sample = i < 0 ? 0 : samples.data[i * samples.channels + channel] * multAmplitude
-      assert.ok(Number.isFinite(sample))
-      const checkSample = checkAudioFunc(
-        (i - offsetSamples) / sampleRate,
-        isMono ? 0 : channel,
-      )
-      const error = Math.abs(checkSample - sample)
-      sumError += error * error
+  for (let channel = 0; channel < channelsCount; channel++) {
+    for (let i = 0; i < samplesCount; i++) {
+      const index = i * channelsCount + channel
+      const sampleActual = actual.samplesData[index]
+      const sampleExpect = expect.samplesData[index]
+      const diff = Math.abs(sampleExpect - sampleActual)
+      if (diff > maxDiff) {
+        throw new Error('diff === ' + diff)
+      }
     }
-
-    const avgError = sumError / samplesCount
-    assert.ok(Number.isFinite(avgError))
-    assert.ok(avgError < 0.06, avgError + '')
   }
 }

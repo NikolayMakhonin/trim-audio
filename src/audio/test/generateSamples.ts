@@ -1,5 +1,3 @@
-import {AudioSamples} from '@flemist/ffmpeg-encode-decode'
-
 export function calcStats({
   samplesData,
   channelsCount,
@@ -32,24 +30,6 @@ export function calcStats({
     sum,
     sumSqr,
   }
-}
-
-export function createSamples({
-  count,
-  channels,
-  sampleRate,
-}: {
-  count: number,
-  channels: number,
-  sampleRate,
-}) {
-  const samples:AudioSamples = {
-    data      : new Float32Array(count),
-    channels  : 2,
-    sampleRate: 44100,
-  }
-
-  return samples
 }
 
 export function generateSilence({
