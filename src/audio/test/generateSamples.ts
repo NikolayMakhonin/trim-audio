@@ -1,3 +1,5 @@
+import {AudioSamples} from '@flemist/ffmpeg-encode-decode'
+
 export function calcStats({
   samplesData,
   channelsCount,
@@ -29,6 +31,45 @@ export function calcStats({
     count: len,
     sum,
     sumSqr,
+  }
+}
+
+export function createSamples({
+  count,
+  channels,
+  sampleRate,
+}: {
+  count: number,
+  channels: number,
+  sampleRate,
+}) {
+  const samples:AudioSamples = {
+    data      : new Float32Array(count),
+    channels  : 2,
+    sampleRate: 44100,
+  }
+
+  return samples
+}
+
+export function generateSilence({
+  samplesData,
+  channelsCount,
+  channel,
+  start,
+  endExclusive,
+  amplitude,
+}: {
+  samplesData: Float32Array,
+  channelsCount: number,
+  channel: number,
+  start: number,
+  endExclusive: number,
+  amplitude: number,
+}) {
+  const len = endExclusive - start
+  for (let i = 0; i < len; i++) {
+    samplesData[i * channelsCount + channel] += amplitude
   }
 }
 
