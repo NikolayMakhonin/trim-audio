@@ -62,8 +62,8 @@ describe('node > normalizeAmplitudeSimple', function () {
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[1]]
-				: channelsCount === 2 ? [[0, 2]]
-					: [[1, 2], [0, 1, 2]],
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0, 2], [1, 2], [0, 1, 2]],
 			patternsActual: ({channels}) => [[
 				[['fill', 0, 1, channels.includes(0) ? 0 : 1]],
 				[['fill', 0, 1, channels.includes(1) ? 0 : 1]],
@@ -75,6 +75,74 @@ describe('node > normalizeAmplitudeSimple', function () {
 				[['fill', 0, 1, channels.includes(2) ? 0 : 1]],
 			]],
 			coef            : [0, 1],
+			separateChannels: [false, true],
+		})
+	})
+
+	it('normalizeWithWindow silence 1', function () {
+		testVariants({
+			samplesCount : [100],
+			channelsCount: [1, 2, 3],
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+			patternsActual: ({channels}) => [[
+				[['fill', 0, 100, channels.includes(0) ? 0.2 : 0.1]],
+				[['fill', 0, 100, channels.includes(1) ? 0.2 : 0.1]],
+				[['fill', 0, 100, channels.includes(2) ? 0.2 : 0.1]],
+			]],
+			patternsExpected: ({channels}) => [[
+				[['fill', 0, 100, channels.includes(0) ? 0.6 : 0.1]],
+				[['fill', 0, 100, channels.includes(1) ? 0.6 : 0.1]],
+				[['fill', 0, 100, channels.includes(2) ? 0.6 : 0.1]],
+			]],
+			coef            : [0.6],
+			separateChannels: [false, true],
+		})
+	})
+
+	it('normalizeWithWindow peak', function () {
+		testVariants({
+			samplesCount : [100],
+			channelsCount: [1, 2, 3],
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+			patternsActual: ({channels}) => [
+				[
+					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(0) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(1) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(2) ? 0.1 : 0]],
+				],
+				[
+					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(0) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(1) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(2) ? 0.1 : 0]],
+				],
+				[
+					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(0) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(1) ? 0.1 : 0]],
+					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(2) ? 0.1 : 0]],
+				],
+			],
+			patternsExpected: ({channels}) => [
+				[
+					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 0, 1, channels.includes(0) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(1) ? 0.3 : 0.1], ['fill', 0, 1, channels.includes(1) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(2) ? 0.3 : 0.1], ['fill', 0, 1, channels.includes(2) ? 0.3 : 0]],
+				],
+				[
+					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 73, 74, channels.includes(0) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(1) ? 0.3 : 0.1], ['fill', 73, 74, channels.includes(1) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(2) ? 0.3 : 0.1], ['fill', 73, 74, channels.includes(2) ? 0.3 : 0]],
+				],
+				[
+					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 99, 100, channels.includes(0) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(1) ? 0.3 : 0.1], ['fill', 99, 100, channels.includes(1) ? 0.3 : 0]],
+					[['fill', 0, 100, channels.includes(2) ? 0.3 : 0.1], ['fill', 99, 100, channels.includes(2) ? 0.3 : 0]],
+				],
+			],
+			coef            : [0.6],
 			separateChannels: [false, true],
 		})
 	})
