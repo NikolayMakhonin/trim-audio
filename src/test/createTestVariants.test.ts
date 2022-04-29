@@ -39,11 +39,13 @@ describe('test > testVariants', function () {
 
 	it('empty middle', function () {
 		const result = []
-		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+		const test = createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
 			result.push([a, b, c])
-		})({
+		})
+		test({
 			a: [1, 2],
 			b: [],
+			d: [2, 3],
 			c: [false, true],
 		})
 

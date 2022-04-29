@@ -17,9 +17,17 @@ type VariantsArgs<TArgs> = {
 type VariantsArgsOf<T> =
   T extends VariantsArgs<infer T> ? T : never
 
+// type TTestVariant<TArgs extends object> = <TVariantArgs extends VariantsArgs<TArgs>>(
+//   args: VariantsArgs<TArgs> & {
+//     [key in Exclude<keyof TVariantArgs, keyof TArgs>]: TVariantArgs[key] | ((args: TArgs) => TArgs[key][])
+//   }
+// ) => void
+
 export function createTestVariants<TArgs extends object>(
   test: (args: TArgs) => void,
-): ((args: VariantsArgs<TArgs>) => void) {
+): <TAdditionalArgs>(args: VariantsArgs<{
+  [key in keyof (TAdditionalArgs)]: key extends keyof TArgs ? TArgs[key] : TAdditionalArgs[key]
+}>) => void {
   return function _testVariants(args) {
     const argsKeys = Object.keys(args)
     const argsValues = Object.values(args) as any[]
