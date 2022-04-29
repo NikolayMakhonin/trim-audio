@@ -4,6 +4,7 @@ import {generateSamples, SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
 import {testSamples} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
+import {sign} from './test/sign'
 
 describe('node > normalizeAmplitudeSimple', function () {
 	this.timeout(30000)
@@ -67,14 +68,15 @@ describe('node > normalizeAmplitudeSimple', function () {
 					: [[0, 2], [1, 2], [0, 1, 2]],
 			coef            : [0, 1],
 			separateChannels: [false, true],
-			patternsActual  : ({channelsCount, channels}) => [
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 1, active ? 0 : 1],
+					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels}) => [
+			patternsExpected: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 1, active ? 0 : 1],
+					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
 		})
@@ -89,14 +91,15 @@ describe('node > normalizeAmplitudeSimple', function () {
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 			coef            : [0.6],
 			separateChannels: [false, true],
-			patternsActual  : ({channelsCount, channels}) => [
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.2 : 0.1],
+					['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels}) => [
+			patternsExpected: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.6 : 0.1],
+					['fill', 0, 100, active ? 0.6 * sign(amplitude) : 0.1],
 				]),
 			],
 		})
@@ -112,14 +115,17 @@ describe('node > normalizeAmplitudeSimple', function () {
 			coef            : [0.6],
 			separateChannels: [false, true],
 			position        : [0, 73, 99],
-			patternsActual  : ({channelsCount, channels, position}) => [
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, 0.1], ['fill', position, position + 1, active ? 0.1 : 0],
+					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
+					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position}) => [
+			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.3 : 0.1], ['fill', position, position + 1, active ? 0.3 : 0],
+					['fill', 0, 100, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', position, position + 1, active ? 0.3 * sign(amplitude) : 0],
 				]),
 			],
 		})
@@ -135,15 +141,17 @@ describe('node > normalizeAmplitudeSimple', function () {
 			coef            : [0.6],
 			separateChannels: [true],
 			position        : [0, 73, 99],
-			patternsActual  : ({channelsCount, channels, position}) => [
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, 0.1], ['fill', position, position + 1, active ? [0.1, 0.2, 0.3][channel] : 0],
+					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
+					['fill', position, position + 1, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position}) => [
+			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] : 0.1],
-					['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] : 0],
+					['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] * sign(amplitude) : 0.1],
+					['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] * sign(amplitude) : 0],
 				]),
 			],
 		})
@@ -159,15 +167,17 @@ describe('node > normalizeAmplitudeSimple', function () {
 			coef            : [0.6],
 			separateChannels: [false],
 			position        : [0, 73, 99],
-			patternsActual  : ({channelsCount, channels, position}) => [
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, 0.1], ['fill', position, position + 1, active ? [0.3, 0.2, 0.1][channel] : 0],
+					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
+					['fill', position, position + 1, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position}) => [
+			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.15 : 0.1],
-					['fill', position, position + 1, active ? [0.45, 0.3, 0.15][channel] : 0],
+					['fill', 0, 100, active ? 0.15 * sign(amplitude) : 0.1],
+					['fill', position, position + 1, active ? [0.45, 0.3, 0.15][channel] * sign(amplitude) : 0],
 				]),
 			],
 		})
