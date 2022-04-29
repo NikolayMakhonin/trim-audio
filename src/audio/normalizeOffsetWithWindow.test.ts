@@ -86,7 +86,7 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
-			windowSamples : [2, 1, 3, 7, 20],
+			windowSamples : [2, 1, 3, 7, 20, 50, 60, 99],
 			offset        : [0, 0.3, 1],
 			amplitude     : [0, 1, 0.5, -1, -0.25],
 			patternsActual: ({channelsCount, channels, offset, amplitude}) => [
@@ -104,7 +104,10 @@ describe('node > normalizeOffsetWithWindow', function () {
 
 					['fill', 0, Math.ceil(windowSamples / 2), active ? -amplitude * ((1 + offset) + offset * (windowSamples - 1)) / windowSamples : 0],
 					['fill', Math.ceil(windowSamples / 2), 100 - windowSamples + Math.ceil(windowSamples / 2) - 1, active ? -offset * amplitude : 0],
-					['fill', 100 - windowSamples + Math.ceil(windowSamples / 2) - 1, 100, active ? -amplitude * ((0.5 + offset) + offset * (windowSamples - 1)) / windowSamples : 0],
+					['fill', Math.max(
+						Math.ceil(windowSamples / 2),
+						100 - windowSamples + Math.ceil(windowSamples / 2) - 1,
+					), 100, active ? -amplitude * ((0.5 + offset) + offset * (windowSamples - 1)) / windowSamples : 0],
 				]),
 			],
 		})
