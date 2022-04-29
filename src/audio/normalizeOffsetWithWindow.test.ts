@@ -3,6 +3,7 @@ import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
 import {generateSamples, SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
 import {testSamples} from './test/testSamples'
+import {mapChannels} from './test/mapChannels'
 
 describe('node > normalizeOffsetWithWindow', function () {
 	this.timeout(30000)
@@ -55,25 +56,25 @@ describe('node > normalizeOffsetWithWindow', function () {
 		})
 	})
 
-	it('silence 0', function () {
+	it('silence', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
-			windowSamples : [1, 3, 7, 20, 90, 98, 99, 100],
-			baseAmplitude : [0, 0.3, 1],
-			patternsActual: ({channels, baseAmplitude}) => [[
-				[['fill', 0, 100, baseAmplitude], ['fill', 0, 100, channels.includes(0) ? 0 : 1]],
-				[['fill', 0, 100, baseAmplitude], ['fill', 0, 100, channels.includes(1) ? 0 : 1]],
-				[['fill', 0, 100, baseAmplitude], ['fill', 0, 100, channels.includes(2) ? 0 : 1]],
-			]],
-			patternsExpected: ({channels, baseAmplitude}) => [[
-				[['fill', 0, 100, channels.includes(0) ? 0 : 1 + baseAmplitude]],
-				[['fill', 0, 100, channels.includes(1) ? 0 : 1 + baseAmplitude]],
-				[['fill', 0, 100, channels.includes(2) ? 0 : 1 + baseAmplitude]],
-			]],
+			windowSamples : [2, 1, 3, 7, 20, 90, 98, 99, 100],
+			offset        : [0, 0.3, 1],
+			patternsActual: ({channelsCount, channels, offset}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? offset : 1 + offset],
+				]),
+			],
+			patternsExpected: ({channelsCount, channels, offset}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? 0 : 1 + offset],
+				]),
+			],
 		})
 	})
 

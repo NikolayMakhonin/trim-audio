@@ -33,32 +33,41 @@ export function normalizeOffsetWithWindow({
     for (let i = 0; i < samplesCount; i++) {
       const value = samplesData[i * channelsCount + channel]
       sum += value
-      if (windowSamples && i >= windowSamples) {
-        if (i > windowSamples) {
-          samplesData[(i - windowSamples - 1) * channelsCount + channel] = checkIsNumber(window[windowIndex])
+      if (windowSamples && i >= windowSamples - 1) {
+        if (i >= windowSamples) {
+          const prevValue = samplesData[(i - windowSamples) * channelsCount + channel]
+          sum -= prevValue
+          samplesData[(i - windowSamples) * channelsCount + channel] = checkIsNumber(window[windowIndex])
         }
 
-        const prevValue = samplesData[(i - windowSamples) * channelsCount + channel]
-        const middleValue = samplesData[(i - windowSamples + windowSamplesHalf) * channelsCount + channel]
-
         const avg = sum / windowSamples
-        sum -= prevValue
         const offset = -avg
 
-        if (i === windowSamples) {
-          for (let j = 0; j < windowSamples; j++) {
+        if (i === windowSamples - 1) {
+          for (let j = 0; j < windowSamplesHalf; j++) {
             window[j] = checkIsNumber((samplesData[j * channelsCount + channel] + offset))
           }
-        } else if (i === samplesCount - 1) {
-          for (let j = samplesCount - windowSamples; j < samplesCount; j++) {
-            samplesData[j * channelsCount + channel] =
-              checkIsNumber((samplesData[j * channelsCount + channel] + offset))
-          }
         } else {
+          const middleValue = samplesData[(i - windowSamples + windowSamplesHalf) * channelsCount + channel]
           window[windowIndex] = checkIsNumber((middleValue + offset))
           windowIndex++
           if (windowIndex >= windowSamplesHalf) {
             windowIndex = 0
+          }
+        }
+
+        if (i === samplesCount - 1) {
+          for (let j = 0; j < windowSamplesHalf; j++) {
+            samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] =
+              checkIsNumber(window[windowIndex])
+            windowIndex++
+            if (windowIndex >= windowSamplesHalf) {
+              windowIndex = 0
+            }
+          }
+          for (let j = windowSamplesHalf; j < windowSamples; j++) {
+            samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] =
+              checkIsNumber((samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] + offset))
           }
         }
       }
