@@ -103,7 +103,7 @@ describe('node > normalizeOffsetWithWindow', function () {
 					['fill', 99, 100, active ? 0.5 * amplitude : 0],
 
 					['fill', 0, Math.ceil(windowSamples / 2), active ? -amplitude * ((1 + offset) + offset * (windowSamples - 1)) / windowSamples : 0],
-					['fill', Math.ceil(windowSamples / 2), 100 - windowSamples + Math.ceil(windowSamples / 2) - 1, active ? -offset * amplitude : offset * amplitude],
+					['fill', Math.ceil(windowSamples / 2), 100 - windowSamples + Math.ceil(windowSamples / 2) - 1, active ? -offset * amplitude : 0],
 					['fill', 100 - windowSamples + Math.ceil(windowSamples / 2) - 1, 100, active ? -amplitude * ((0.5 + offset) + offset * (windowSamples - 1)) / windowSamples : 0],
 				]),
 			],
