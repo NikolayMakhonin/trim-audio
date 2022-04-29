@@ -110,9 +110,10 @@ export function generateSamples({
   channelsCount: number,
   patterns: SamplesPattern[][],
 }) {
-  for (let i = 0, len = patterns.length; i < len; i++) {
-    for (let channel = 0; channel < channelsCount; channel++) {
-      const [type, start, endExclusive, amplitude] = patterns[channel][i]
+  for (let channel = 0; channel < channelsCount; channel++) {
+    const _patterns = patterns[channel]
+    for (let i = 0, len = _patterns.length; i < len; i++) {
+      const [type, start, endExclusive, amplitude] = _patterns[i]
       switch (type) {
         case 'fill':
           generateFillSamples({

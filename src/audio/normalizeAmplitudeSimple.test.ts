@@ -69,10 +69,10 @@ describe('node > normalizeAmplitudeSimple', function () {
 				[['fill', 0, 1, channels.includes(1) ? 0 : 1]],
 				[['fill', 0, 1, channels.includes(2) ? 0 : 1]],
 			]],
-			patternsExpected: [[
-				[['fill', 0, 1, 0]],
-				[['fill', 0, 1, 0]],
-				[['fill', 0, 1, 0]],
+			patternsExpected: ({channels}) => [[
+				[['fill', 0, 1, channels.includes(0) ? 0 : 1]],
+				[['fill', 0, 1, channels.includes(1) ? 0 : 1]],
+				[['fill', 0, 1, channels.includes(2) ? 0 : 1]],
 			]],
 			coef            : [0, 1],
 			separateChannels: [false, true],

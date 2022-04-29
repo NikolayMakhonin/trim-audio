@@ -68,7 +68,22 @@ export function createTestVariants<TArgs extends object>(
     }
 
     while (nextVariant()) {
-      test(variantArgs)
+      try {
+        test(variantArgs)
+      } catch (err) {
+        console.error(JSON.stringify(variantArgs, null, 2))
+        console.error(err)
+        // again for debug
+        try {
+          // eslint-disable-next-line no-debugger
+          debugger
+          test(variantArgs)
+        } catch {
+          // eslint-disable-next-line no-debugger
+          debugger
+        }
+        throw err
+      }
     }
   }
 }
