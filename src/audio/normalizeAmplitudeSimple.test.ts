@@ -134,39 +134,17 @@ describe('node > normalizeAmplitudeSimple', function () {
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 			coef            : [0.6],
 			separateChannels: [true],
-			patternsActual  : ({channels}) => [
-				[
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(0) ? 0.1 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(2) ? 0.3 : 0]],
-				],
-				[
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(0) ? 0.1 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(2) ? 0.3 : 0]],
-				],
-				[
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(0) ? 0.1 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(2) ? 0.3 : 0]],
-				],
+			position        : [0, 73, 99],
+			patternsActual  : ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, 0.1], ['fill', position, position + 1, active ? [0.1, 0.2, 0.3][channel] : 0],
+				]),
 			],
-			patternsExpected: ({channels}) => [
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 0, 1, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.2 : 0.1], ['fill', 0, 1, channels.includes(1) ? 0.4 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 0, 1, channels.includes(2) ? 0.45 : 0]],
-				],
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 73, 74, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.2 : 0.1], ['fill', 73, 74, channels.includes(1) ? 0.4 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 73, 74, channels.includes(2) ? 0.45 : 0]],
-				],
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.3 : 0.1], ['fill', 99, 100, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.2 : 0.1], ['fill', 99, 100, channels.includes(1) ? 0.4 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 99, 100, channels.includes(2) ? 0.45 : 0]],
-				],
+			patternsExpected: ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] : 0.1],
+					['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] : 0],
+				]),
 			],
 		})
 	})
@@ -180,39 +158,17 @@ describe('node > normalizeAmplitudeSimple', function () {
 					: [[], [0], [0, 1], [0, 2], [0, 1, 2]],
 			coef            : [0.6],
 			separateChannels: [false],
-			patternsActual  : ({channels}) => [
-				[
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 0, 1, channels.includes(2) ? 0.1 : 0]],
-				],
-				[
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 73, 74, channels.includes(2) ? 0.1 : 0]],
-				],
-				[
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(0) ? 0.3 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(1) ? 0.2 : 0]],
-					[['fill', 0, 100, 0.1], ['fill', 99, 100, channels.includes(2) ? 0.1 : 0]],
-				],
+			position        : [0, 73, 99],
+			patternsActual  : ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, 0.1], ['fill', position, position + 1, active ? [0.3, 0.2, 0.1][channel] : 0],
+				]),
 			],
-			patternsExpected: ({channels}) => [
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.15 : 0.1], ['fill', 0, 1, channels.includes(0) ? 0.45 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.15 : 0.1], ['fill', 0, 1, channels.includes(1) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 0, 1, channels.includes(2) ? 0.15 : 0]],
-				],
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.15 : 0.1], ['fill', 73, 74, channels.includes(0) ? 0.45 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.15 : 0.1], ['fill', 73, 74, channels.includes(1) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 73, 74, channels.includes(2) ? 0.15 : 0]],
-				],
-				[
-					[['fill', 0, 100, channels.includes(0) ? 0.15 : 0.1], ['fill', 99, 100, channels.includes(0) ? 0.45 : 0]],
-					[['fill', 0, 100, channels.includes(1) ? 0.15 : 0.1], ['fill', 99, 100, channels.includes(1) ? 0.3 : 0]],
-					[['fill', 0, 100, channels.includes(2) ? 0.15 : 0.1], ['fill', 99, 100, channels.includes(2) ? 0.15 : 0]],
-				],
+			patternsExpected: ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? 0.15 : 0.1],
+					['fill', position, position + 1, active ? [0.45, 0.3, 0.15][channel] : 0],
+				]),
 			],
 		})
 	})
