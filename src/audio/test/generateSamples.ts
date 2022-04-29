@@ -32,7 +32,7 @@ export function calcStats({
   }
 }
 
-export function generateSilence({
+export function generateFillSamples({
   samplesData,
   channelsCount,
   channel,
@@ -95,5 +95,48 @@ export function generateTrianglesSamples({
       endExclusive: pattern[1],
       amplitude   : pattern[2],
     })
+  }
+}
+
+export type SamplesType = 'fill' | 'triangle'
+export type SamplesPattern = [type: SamplesType, start: number, endExclusive: number, amplitude: number]
+
+export function generateSamples({
+  samplesData,
+  channelsCount,
+  patterns,
+}: {
+  samplesData: Float32Array,
+  channelsCount: number,
+  patterns: SamplesPattern[][],
+}) {
+  for (let i = 0, len = patterns.length; i < len; i++) {
+    for (let channel = 0; channel < channelsCount; channel++) {
+      const [type, start, endExclusive, amplitude] = patterns[channel][i]
+      switch (type) {
+        case 'fill':
+          generateFillSamples({
+            samplesData,
+            channelsCount,
+            channel,
+            start,
+            endExclusive,
+            amplitude,
+          })
+          break
+        case 'triangle':
+          generateTriangleSamples({
+            samplesData,
+            channelsCount,
+            channel,
+            start,
+            endExclusive,
+            amplitude,
+          })
+          break
+        default:
+          throw new Error('Unknown type: ' + type)
+      }
+    }
   }
 }

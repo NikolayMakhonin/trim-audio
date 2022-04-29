@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import {testVariants} from './testVariants'
+import {createTestVariants} from './createTestVariants'
 
 describe('test > testVariants', function () {
 	it('base', function () {
 		const result = []
-		testVariants({
+		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			result.push([a, b, c])
+		})({
 			a: [1, 2],
 			b: ['3', '4'],
 			c: [true, false],
-		}, ({a, b, c}) => {
-			result.push([a, b, c])
 		})
 
 		assert.deepStrictEqual(result, [
@@ -26,12 +26,12 @@ describe('test > testVariants', function () {
 
 	it('empty end', function () {
 		const result = []
-		testVariants({
+		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			result.push([a, b, c])
+		})({
 			a: [1, 2],
 			b: ['3', '4'],
 			c: [],
-		}, ({a, b, c}) => {
-			result.push([a, b, c])
 		})
 
 		assert.deepStrictEqual(result, [])
@@ -39,12 +39,12 @@ describe('test > testVariants', function () {
 
 	it('empty middle', function () {
 		const result = []
-		testVariants({
+		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			result.push([a, b, c])
+		})({
 			a: [1, 2],
 			b: [],
 			c: [false, true],
-		}, ({a, b, c}) => {
-			result.push([a, b, c])
 		})
 
 		assert.deepStrictEqual(result, [])
@@ -52,12 +52,12 @@ describe('test > testVariants', function () {
 
 	it('empty start', function () {
 		const result = []
-		testVariants({
+		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			result.push([a, b, c])
+		})({
 			a: [],
 			b: ['3', '4'],
 			c: [false, true],
-		}, ({a, b, c}) => {
-			result.push([a, b, c])
 		})
 
 		assert.deepStrictEqual(result, [])
@@ -65,14 +65,14 @@ describe('test > testVariants', function () {
 
 	it('calculated', function () {
 		const result = []
-		testVariants({
+		createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			result.push([a, b, c])
+		})({
 			a: () => [1, 2],
 			b: ({a}) => a === 1 ? ['2', '3', '4'] : ['2'],
 			c: ({b}) => b === '2' ? [false, true]
 				: b === '3' ? []
-				: [true],
-		}, ({a, b, c}) => {
-			result.push([a, b, c])
+					: [true],
 		})
 
 		assert.deepStrictEqual(result, [

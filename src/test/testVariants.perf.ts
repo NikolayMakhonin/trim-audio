@@ -1,23 +1,27 @@
 import { calcPerformance } from 'rdtsc'
-import {testVariants} from './testVariants'
+import {createTestVariants} from './createTestVariants'
 
 describe('test > testVariants perf', function () {
 	this.timeout(300000)
 
 	it('perf', function () {
+		const testVariants = createTestVariants(({a, b, c}: {a: number, b: string, c: boolean}) => {
+			return a === 1 && b === '4' && c === false
+		})
+
+		const args = {
+			a: [1, 2],
+			b: ['3', '4'],
+			c: [true, false],
+		}
+
 		const result = calcPerformance(
 			10000,
 			() => {
 
 			},
 			() => {
-				testVariants({
-					a: [1, 2],
-					b: ['3', '4'],
-					c: [true, false],
-				}, ({a, b, c}) => {
-					return a === 1 && b === '4' && c === false
-				})
+				testVariants(args)
 			},
 		)
 
