@@ -78,7 +78,7 @@ export function checkSamples({
       const sampleExpect = expect.samplesData[index]
       const diff = Math.abs(sampleExpect - sampleActual)
       if (diff > maxDiff) {
-        throw new Error('diff === ' + diff)
+        throw new Error(`channel: ${channel}; index: ${i}; actual: ${sampleActual}; expect: ${sampleExpect}`)
       }
     }
   }

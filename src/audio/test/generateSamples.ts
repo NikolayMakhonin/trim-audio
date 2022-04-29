@@ -47,8 +47,7 @@ export function generateFillSamples({
   endExclusive: number,
   amplitude: number,
 }) {
-  const len = endExclusive - start
-  for (let i = 0; i < len; i++) {
+  for (let i = start; i < endExclusive; i++) {
     samplesData[i * channelsCount + channel] += amplitude
   }
 }

@@ -13,7 +13,6 @@ export function normalizeOffsetWithWindow({
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const window = new Float32Array(windowSamplesHalf)
-  let windowIndex = 0
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -30,6 +29,7 @@ export function normalizeOffsetWithWindow({
     const channel = channels[nChannel]
 
     let sum = 0
+    let windowIndex = 0
     for (let i = 0; i < samplesCount; i++) {
       const value = samplesData[i * channelsCount + channel]
       sum += value
