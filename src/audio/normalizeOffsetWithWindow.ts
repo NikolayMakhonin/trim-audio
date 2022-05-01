@@ -1,18 +1,26 @@
-import {checkIsNumber, generateIndexArray} from './helpers'
+import {correctSample, EPSILON, generateIndexArray} from './helpers'
 
-export function normalizeOffsetWithWindow({
+function _normalizeAmplitudeWithWindow({
   samplesData,
   channelsCount,
   channels,
+  coef,
+  maxMult,
   windowSamples,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
+  coef: number,
+  maxMult?: number,
   windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
-  const window = new Float32Array(windowSamplesHalf)
+  const windowSamples2 = windowSamples * 2
+
+  if (maxMult == null) {
+    maxMult = 1e16
+  }
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -24,53 +32,108 @@ export function normalizeOffsetWithWindow({
   }
 
   const samplesCount = Math.floor(samplesData.length / channelsCount)
+  let maxPrev = 0
+  let max = 0
+  let maxNext = 0
 
-  for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-    const channel = channels[nChannel]
-
-    let sum = 0
-    let windowIndex = 0
-    for (let i = 0; i < samplesCount; i++) {
-      const value = samplesData[i * channelsCount + channel]
-      sum += value
-      if (windowSamples && i >= windowSamples - 1) {
-        if (i >= windowSamples) {
-          const prevValue = samplesData[(i - windowSamples) * channelsCount + channel]
-          sum -= prevValue
-          samplesData[(i - windowSamples) * channelsCount + channel] = checkIsNumber(window[windowIndex])
-        }
-
-        const avg = sum / windowSamples
-        const offset = -avg
-
-        if (i === windowSamples - 1) {
-          for (let j = 0; j < windowSamplesHalf; j++) {
-            window[j] = checkIsNumber((samplesData[j * channelsCount + channel] + offset))
-          }
-        } else {
-          const middleValue = samplesData[(i - windowSamples + windowSamplesHalf) * channelsCount + channel]
-          window[windowIndex] = checkIsNumber((middleValue + offset))
-          windowIndex++
-          if (windowIndex >= windowSamplesHalf) {
-            windowIndex = 0
-          }
-        }
-
-        if (i === samplesCount - 1) {
-          for (let j = 0; j < windowSamplesHalf; j++) {
-            samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] =
-              checkIsNumber(window[windowIndex])
-            windowIndex++
-            if (windowIndex >= windowSamplesHalf) {
-              windowIndex = 0
-            }
-          }
-          for (let j = windowSamplesHalf; j < windowSamples; j++) {
-            samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] =
-              checkIsNumber((samplesData[(samplesCount - windowSamples + j) * channelsCount + channel] + offset))
-          }
-        }
+  function _normalize(i: number) {
+    let maxJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
+    for (let j = 0; j < maxJ; j++) {
+      const index = (i - windowSamples2 + j) * channelsCount
+      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
+      const multPrev = Math.min(maxMult, maxPrev < EPSILON ? maxMult : coef / maxPrev)
+      const _mult = multPrev >= mult ? mult : multPrev + (mult - multPrev) * j / windowSamplesHalf
+      for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+        const channel = channels[nChannel]
+        const value = samplesData[index + channel]
+        samplesData[index + channel] = (value * _mult)
+      }
+    }
+    const _windowSamplesHalf = windowSamples - windowSamplesHalf
+    maxJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
+    for (let j = 0; j < maxJ; j++) {
+      const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
+      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
+      const multNext = Math.min(maxMult, maxNext < EPSILON ? maxMult : coef / maxNext)
+      const _mult = mult <= multNext ? mult : mult + (multNext - mult) * j / _windowSamplesHalf
+      for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+        const channel = channels[nChannel]
+        const value = samplesData[index + channel]
+        samplesData[index + channel] = correctSample(value * _mult)
       }
     }
   }
+
+  for (let i = 0; i < samplesCount; i++) {
+    if (i >= windowSamples2 && i % windowSamples === 0) {
+      _normalize(i)
+    }
+    if (i % windowSamples === 0) {
+      maxPrev = max
+      max = maxNext
+      maxNext = 0
+    }
+    const index = i * channelsCount
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      const channel = channels[nChannel]
+      const valueNext = samplesData[index + channel]
+      const valueNextAbs = Math.abs(valueNext)
+      if (valueNextAbs > maxNext) {
+        maxNext = valueNextAbs
+      }
+    }
+  }
+
+  const i = Math.ceil(samplesCount / windowSamples) * windowSamples
+  _normalize(i)
+  maxPrev = max
+  max = maxNext
+  maxNext = 0
+  _normalize(i + windowSamples)
+}
+
+export function normalizeAmplitudeWithWindow({
+  samplesData,
+  channelsCount,
+  channels,
+  separateChannels,
+  coef,
+  windowSamples,
+}: {
+  samplesData: Float32Array,
+  channelsCount: number,
+  channels?: number[],
+  separateChannels?: boolean,
+  coef: number,
+  windowSamples: number,
+}) {
+  if (channels == null) {
+    channels = generateIndexArray(channelsCount)
+  }
+
+  const channelsLength = channels.length
+  if (channelsLength === 0) {
+    return
+  }
+
+  if (separateChannels) {
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      _normalizeAmplitudeWithWindow({
+        samplesData,
+        channelsCount,
+        channels: [channels[nChannel]],
+        coef,
+        windowSamples,
+      })
+    }
+    return
+  }
+
+  _normalizeAmplitudeWithWindow({
+    samplesData,
+    channelsCount,
+    channels,
+    coef,
+    windowSamples,
+  })
 }
