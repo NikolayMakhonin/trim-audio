@@ -2,7 +2,7 @@
 import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
 import {generateSamples, SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
-import {testSamples} from './test/testSamples'
+import {testSamples, testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {sign} from './test/sign'
 
@@ -26,27 +26,12 @@ describe('node > normalizeAmplitudeSimple', function () {
 		coef: number,
 		separateChannels: boolean,
 	}) => {
-		testSamples({
+		testSamplesWithPatterns({
 			samplesCount,
 			channelsCount,
 			maxDiff: 1e-7,
-			fillData(
-				samplesDataActual,
-				samplesDataExpect,
-				channelsCount,
-				samplesCount,
-			) {
-				generateSamples({
-					samplesData: samplesDataActual,
-					channelsCount,
-					patterns   : patternsActual,
-				})
-				generateSamples({
-					samplesData: samplesDataExpect,
-					channelsCount,
-					patterns   : patternsExpected,
-				})
-			},
+			patternsActual,
+			patternsExpected,
 			handle(samplesData, channelsCount, samplesCount) {
 				normalizeAmplitudeSimple({
 					samplesData,

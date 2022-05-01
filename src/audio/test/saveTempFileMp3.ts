@@ -15,3 +15,11 @@ export async function saveTempFileMp3(fileName: string, samples: AudioSamples) {
 
   await saveTempFile(fileName, data)
 }
+
+export async function saveTempFileWav(fileName: string, samples: AudioSamples) {
+  const data: Uint8Array = await ffmpegEncode(samples, {
+    outputFormat: 'wav', // same as file extension
+  })
+
+  await saveTempFile(fileName, data)
+}

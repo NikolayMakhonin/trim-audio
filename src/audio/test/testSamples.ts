@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-shadow */
 import {checkSamples} from './checkSamples'
+import {generateSamples, SamplesPattern} from './generateSamples'
 
 export function testSamples({
   samplesCount,
@@ -33,5 +35,45 @@ export function testSamples({
       channelsCount,
     },
     maxDiff,
+  })
+}
+
+export function testSamplesWithPatterns({
+  samplesCount,
+  channelsCount,
+  maxDiff,
+  patternsActual,
+  patternsExpected,
+  handle,
+}: {
+  samplesCount: number,
+  channelsCount: number,
+  maxDiff?: number,
+  patternsActual: SamplesPattern[][],
+  patternsExpected: SamplesPattern[][],
+  handle: (samplesData: Float32Array, channelsCount: number, samplesCount: number) => void,
+}) {
+  return testSamples({
+    samplesCount,
+    channelsCount,
+    maxDiff,
+    fillData(
+      samplesDataActual,
+      samplesDataExpect,
+      channelsCount,
+      samplesCount,
+    ) {
+      generateSamples({
+        samplesData: samplesDataActual,
+        channelsCount,
+        patterns   : patternsActual,
+      })
+      generateSamples({
+        samplesData: samplesDataExpect,
+        channelsCount,
+        patterns   : patternsExpected,
+      })
+    },
+    handle,
   })
 }
