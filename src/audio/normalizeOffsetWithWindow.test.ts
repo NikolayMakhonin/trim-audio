@@ -4,7 +4,6 @@ import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
-import {sign} from './test/sign'
 
 describe('node > normalizeOffsetWithWindow', function () {
 	this.timeout(30000)
@@ -13,8 +12,6 @@ describe('node > normalizeOffsetWithWindow', function () {
 		samplesCount,
 		channelsCount,
 		channels,
-		separateChannels,
-		coef,
 		windowSamples,
 		patternsActual,
 		patternsExpected,
@@ -22,8 +19,6 @@ describe('node > normalizeOffsetWithWindow', function () {
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
-		separateChannels?: boolean,
-		coef: number,
 		windowSamples: number,
 		patternsActual: SamplesPattern[][],
 		patternsExpected: SamplesPattern[][],
@@ -39,8 +34,6 @@ describe('node > normalizeOffsetWithWindow', function () {
 					samplesData,
 					channelsCount,
 					channels,
-					separateChannels,
-					coef,
 					windowSamples,
 				})
 			},
@@ -54,11 +47,9 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50],
-			coef            : [0, 1],
-			separateChannels: [true],
-			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, amplitude}) => [
+			windowSamples : [2, 1, 3, 7, 20, 50],
+			amplitude     : [0, 1, 0.5, -1, -0.25],
+			patternsActual: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
@@ -78,11 +69,9 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50],
-			coef            : [0.6],
-			separateChannels: [true],
-			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, amplitude}) => [
+			windowSamples : [2, 1, 3, 7, 20, 50],
+			amplitude     : [0, 1, 0.5, -1, -0.25],
+			patternsActual: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 				]),
@@ -102,11 +91,9 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 3, 1, 7, 20, 50],
-			coef            : [0.6],
-			separateChannels: [true],
-			amplitude       : [1, 0, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, amplitude}) => [
+			windowSamples : [10, 2, 3, 1, 7, 20, 50],
+			amplitude     : [1, 0, 0.5, -1, -0.25],
+			patternsActual: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 0, 1, active ? 0.1 * amplitude : 0],
@@ -131,11 +118,9 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 4, 5, 20, 25, 50],
-			coef            : [0.6],
-			separateChannels: [true],
-			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, amplitude}) => [
+			windowSamples : [10, 2, 1, 4, 5, 20, 25, 50],
+			amplitude     : [0, 1, 0.5, -1, -0.25],
+			patternsActual: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 99, 100, active ? 0.1 * amplitude : 0],
@@ -161,10 +146,8 @@ describe('node > normalizeOffsetWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			coef            : [0.6],
-			separateChannels: [true],
-			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, amplitude}) => [
+			amplitude     : [0, 1, 0.5, -1, -0.25],
+			patternsActual: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 50, 51, active ? 0.1 * amplitude : 0],
