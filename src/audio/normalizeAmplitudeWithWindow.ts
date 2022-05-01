@@ -46,7 +46,7 @@ function _normalizeAmplitudeWithWindow({
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
-        samplesData[index + channel] = (value * _mult)
+        samplesData[index + channel] = correctSample(value * _mult)
       }
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf

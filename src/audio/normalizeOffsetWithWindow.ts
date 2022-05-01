@@ -1,26 +1,20 @@
-import {correctSample, EPSILON, generateIndexArray} from './helpers'
+import {checkIsNumber, correctSample, EPSILON, generateIndexArray} from './helpers'
 
-function _normalizeAmplitudeWithWindow({
+function _normalizeOffsetWithWindow({
   samplesData,
   channelsCount,
   channels,
   coef,
-  maxMult,
   windowSamples,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   coef: number,
-  maxMult?: number,
   windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
-
-  if (maxMult == null) {
-    maxMult = 1e16
-  }
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -32,67 +26,65 @@ function _normalizeAmplitudeWithWindow({
   }
 
   const samplesCount = Math.floor(samplesData.length / channelsCount)
-  let maxPrev = 0
-  let max = 0
-  let maxNext = 0
+  let offsetPrev = 0
+  let offset = 0
+  let offsetNext = 0
+  let sumNext = 0
 
   function _normalize(i: number) {
-    let maxJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
-    for (let j = 0; j < maxJ; j++) {
+    let offsetJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
+    for (let j = 0; j < offsetJ; j++) {
       const index = (i - windowSamples2 + j) * channelsCount
-      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
-      const multPrev = Math.min(maxMult, maxPrev < EPSILON ? maxMult : coef / maxPrev)
-      const _mult = multPrev >= mult ? mult : multPrev + (mult - multPrev) * j / windowSamplesHalf
+      const _offset = offsetPrev + (offset - offsetPrev) * (j + windowSamplesHalf) / windowSamples
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
-        samplesData[index + channel] = (value * _mult)
+        samplesData[index + channel] = checkIsNumber(value + _offset)
       }
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
-    maxJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
-    for (let j = 0; j < maxJ; j++) {
+    offsetJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
+    for (let j = 0; j < offsetJ; j++) {
       const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
-      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
-      const multNext = Math.min(maxMult, maxNext < EPSILON ? maxMult : coef / maxNext)
-      const _mult = mult <= multNext ? mult : mult + (multNext - mult) * j / _windowSamplesHalf
+      const _offset = offset + (offsetNext - offset) * j / windowSamples
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
-        samplesData[index + channel] = correctSample(value * _mult)
+        samplesData[index + channel] = checkIsNumber(value + _offset)
       }
     }
   }
 
   for (let i = 0; i < samplesCount; i++) {
+    if (i % windowSamples === 0) {
+      offsetNext = -sumNext / windowSamples
+    }
     if (i >= windowSamples2 && i % windowSamples === 0) {
       _normalize(i)
     }
     if (i % windowSamples === 0) {
-      maxPrev = max
-      max = maxNext
-      maxNext = 0
+      offsetPrev = i === windowSamples ? offsetNext : offset
+      offset = offsetNext
+      sumNext = 0
     }
     const index = i * channelsCount
     for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
       const channel = channels[nChannel]
       const valueNext = samplesData[index + channel]
-      const valueNextAbs = Math.abs(valueNext)
-      if (valueNextAbs > maxNext) {
-        maxNext = valueNextAbs
-      }
+      sumNext += valueNext
     }
   }
 
+  offsetNext = -sumNext / (samplesCount % windowSamples || windowSamples)
   const i = Math.ceil(samplesCount / windowSamples) * windowSamples
   _normalize(i)
-  maxPrev = max
-  max = maxNext
-  maxNext = 0
+  offsetPrev = i === windowSamples ? offsetNext : offset
+  offset = offsetNext
+  sumNext = 0
   _normalize(i + windowSamples)
 }
 
-export function normalizeAmplitudeWithWindow({
+export function normalizeOffsetWithWindow({
   samplesData,
   channelsCount,
   channels,
@@ -118,7 +110,7 @@ export function normalizeAmplitudeWithWindow({
 
   if (separateChannels) {
     for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-      _normalizeAmplitudeWithWindow({
+      _normalizeOffsetWithWindow({
         samplesData,
         channelsCount,
         channels: [channels[nChannel]],
@@ -129,7 +121,7 @@ export function normalizeAmplitudeWithWindow({
     return
   }
 
-  _normalizeAmplitudeWithWindow({
+  _normalizeOffsetWithWindow({
     samplesData,
     channelsCount,
     channels,

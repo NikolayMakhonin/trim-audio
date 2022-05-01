@@ -3,10 +3,10 @@ import {SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
+import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
 import {sign} from './test/sign'
 
-describe('node > normalizeAmplitudeWithWindow', function () {
+describe('node > normalizeOffsetWithWindow', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({
@@ -35,7 +35,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			patternsActual,
 			patternsExpected,
 			handle(samplesData, channelsCount) {
-				normalizeAmplitudeWithWindow({
+				normalizeOffsetWithWindow({
 					samplesData,
 					channelsCount,
 					channels,
@@ -80,7 +80,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 			windowSamples   : [2, 1, 3, 7, 20, 50],
 			coef            : [0.6],
-			separateChannels: [false, true],
+			separateChannels: [true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
 			patternsActual  : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
@@ -89,13 +89,13 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			],
 			patternsExpected: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 0, 100, active ? 0 : 0.1],
 				]),
 			],
 		})
 	})
 
-	it('peak start', function () {
+	xit('peak start', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
@@ -123,7 +123,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('peak end', function () {
+	xit('peak end', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
@@ -151,7 +151,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('peak middle', function () {
+	xit('peak middle', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
@@ -181,7 +181,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('peak start/end', function () {
+	xit('peak start/end', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
@@ -213,7 +213,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('separateChannels', function () {
+	xit('separateChannels', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
@@ -248,7 +248,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('not separateChannels', function () {
+	xit('not separateChannels', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
