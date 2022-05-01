@@ -4,8 +4,6 @@ function _normalizeAmplitudeWithWindow({
   samplesData,
   channelsCount,
   channels,
-  amplitude,
-  offset,
   coef,
   maxMult,
   windowSamples,
@@ -13,18 +11,12 @@ function _normalizeAmplitudeWithWindow({
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
-  amplitude: boolean,
-  offset: boolean,
-  coef?: number,
+  coef: number,
   maxMult?: number,
   windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
-
-  if (coef == null) {
-    coef = 1
-  }
 
   if (maxMult == null) {
     maxMult = 1e16
@@ -40,9 +32,6 @@ function _normalizeAmplitudeWithWindow({
   }
 
   const samplesCount = Math.floor(samplesData.length / channelsCount)
-  let sumPrev = 0
-  let sum = 0
-  let sumNext = 0
   let maxPrev = 0
   let max = 0
   let maxNext = 0
@@ -80,9 +69,6 @@ function _normalizeAmplitudeWithWindow({
       _normalize(i)
     }
     if (i % windowSamples === 0) {
-      sumPrev = sum
-      sum = sumNext
-      sumNext = 0
       maxPrev = max
       max = maxNext
       maxNext = 0
@@ -91,7 +77,6 @@ function _normalizeAmplitudeWithWindow({
     for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
       const channel = channels[nChannel]
       const valueNext = samplesData[index + channel]
-      sumNext += valueNext
       const valueNextAbs = Math.abs(valueNext)
       if (valueNextAbs > maxNext) {
         maxNext = valueNextAbs
@@ -112,20 +97,14 @@ export function normalizeAmplitudeWithWindow({
   channelsCount,
   channels,
   separateChannels,
-  amplitude,
-  offset,
   coef,
-  maxMult,
   windowSamples,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   separateChannels?: boolean,
-  amplitude: boolean,
-  offset: boolean,
-  coef?: number,
-  maxMult?: number,
+  coef: number,
   windowSamples: number,
 }) {
   if (channels == null) {
@@ -143,10 +122,7 @@ export function normalizeAmplitudeWithWindow({
         samplesData,
         channelsCount,
         channels: [channels[nChannel]],
-        amplitude,
-        offset,
         coef,
-        maxMult,
         windowSamples,
       })
     }
@@ -157,10 +133,7 @@ export function normalizeAmplitudeWithWindow({
     samplesData,
     channelsCount,
     channels,
-    amplitude,
-    offset,
     coef,
-    maxMult,
     windowSamples,
   })
 }
