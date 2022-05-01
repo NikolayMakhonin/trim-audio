@@ -32,17 +32,17 @@ function _normalizeOffsetWithWindow({
   let sumNext = 0
 
   function _normalize(i: number) {
+    const _windowSamplesHalf = windowSamples - windowSamplesHalf
     let offsetJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
     for (let j = 0; j < offsetJ; j++) {
       const index = (i - windowSamples2 + j) * channelsCount
-      const _offset = offsetPrev + (offset - offsetPrev) * (j + windowSamplesHalf) / windowSamples
+      const _offset = offsetPrev + (offset - offsetPrev) * (j + _windowSamplesHalf) / windowSamples
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
         samplesData[index + channel] = checkIsNumber(value + _offset)
       }
     }
-    const _windowSamplesHalf = windowSamples - windowSamplesHalf
     offsetJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
     for (let j = 0; j < offsetJ; j++) {
       const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
