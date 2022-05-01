@@ -153,14 +153,14 @@ describe('node > normalizeOffsetWithWindow', function () {
 		})
 	})
 
-	xit('peak middle', function () {
+	it('peak middle', function () {
 		testVariants({
+			windowSamples: [10, 2, 1, 5, 25],
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 5, 25, 50],
 			coef            : [0.6],
 			separateChannels: [true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -172,12 +172,13 @@ describe('node > normalizeOffsetWithWindow', function () {
 			],
 			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 50 - windowSamples + Math.ceil(windowSamples / 2), active ? 0.6 * sign(amplitude) : 0.1],
-					['fill', 50 - windowSamples + Math.ceil(windowSamples / 2), 50, active ? 0.6 * sign(amplitude) : 0.1, active ? 0.3 * sign(amplitude) : 0.1],
-					['fill', 50, 51, active ? 0.6 * sign(amplitude) : 0.1],
-					['fill', 51, 50 + windowSamples, active ? 0.3 * sign(amplitude) : 0.1],
-					['fill', 50 + windowSamples, 50 + windowSamples + Math.ceil(windowSamples / 2), active ? 0.3 * sign(amplitude) : 0.1, active ? 0.6 * sign(amplitude) : 0.1],
-					['fill', 50 + windowSamples + Math.ceil(windowSamples / 2), 100, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
+					['fill', 50, 51, active ? 0.1 * amplitude : 0],
+
+					['fill', 0, 50 - windowSamples + Math.ceil(windowSamples / 2), active ? -0.1 * amplitude : 0],
+					['fill', 50 - windowSamples + Math.ceil(windowSamples / 2), 50 + Math.ceil(windowSamples / 2), active ? -0.1 * amplitude : 0, active ? -((0.1 * windowSamples + 0.1) / windowSamples) * amplitude : 0],
+					['fill', 50 + Math.ceil(windowSamples / 2), 50 + windowSamples + Math.ceil(windowSamples / 2), active ? -((0.1 * windowSamples + 0.1) / windowSamples) * amplitude : 0, active ? -0.1 * amplitude : 0],
+					['fill', 50 + windowSamples + Math.ceil(windowSamples / 2), 100, active ? -0.1 * amplitude : 0],
 				]),
 			],
 		})
