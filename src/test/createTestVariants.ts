@@ -26,7 +26,9 @@ type VariantsArgsOf<T> =
 export function createTestVariants<TArgs extends object>(
   test: (args: TArgs) => void,
 ): <TAdditionalArgs>(args: VariantsArgs<{
-  [key in keyof (TAdditionalArgs)]: key extends keyof TArgs ? TArgs[key] : TAdditionalArgs[key]
+  [key in (keyof TAdditionalArgs | keyof TArgs)]: key extends keyof TArgs ? TArgs[key]
+    : key extends keyof TAdditionalArgs ? TAdditionalArgs[key]
+    : never
 }>) => void {
   return function _testVariants(args) {
     const argsKeys = Object.keys(args)

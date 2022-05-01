@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
-import {generateSamples, SamplesPattern} from './test/generateSamples'
+import {SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
-import {testSamples, testSamplesWithPatterns} from './test/testSamples'
+import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {sign} from './test/sign'
 
@@ -48,7 +48,7 @@ describe('node > normalizeAmplitudeSimple', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
-			channels     : ({channelsCount}) => channelsCount === 1 ? [[1]]
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
 			coef            : [0, 1],

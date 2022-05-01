@@ -38,17 +38,23 @@ export function generateFillSamples({
   channel,
   start,
   endExclusive,
-  amplitude,
+  amplitudeStart,
+  amplitudeEnd,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
   channel: number,
   start: number,
   endExclusive: number,
-  amplitude: number,
+  amplitudeStart: number,
+  amplitudeEnd?: number,
 }) {
+  if (amplitudeEnd == null) {
+    amplitudeEnd = amplitudeStart
+  }
   for (let i = start; i < endExclusive; i++) {
-    samplesData[i * channelsCount + channel] += amplitude
+    samplesData[i * channelsCount + channel]
+      += (i - start) * (amplitudeEnd - amplitudeStart) / (endExclusive - start) + amplitudeStart
   }
 }
 
@@ -98,7 +104,13 @@ export function generateTrianglesSamples({
 }
 
 export type SamplesType = 'fill' | 'triangle'
-export type SamplesPattern = [type: SamplesType, start: number, endExclusive: number, amplitude: number]
+export type SamplesPattern = [
+  type: SamplesType,
+  start: number,
+  endExclusive: number,
+  amplitudeStart: number,
+  amplitudeEnd?: number,
+]
 
 export function generateSamples({
   samplesData,
@@ -112,7 +124,7 @@ export function generateSamples({
   for (let channel = 0; channel < channelsCount; channel++) {
     const _patterns = patterns[channel]
     for (let i = 0, len = _patterns.length; i < len; i++) {
-      const [type, start, endExclusive, amplitude] = _patterns[i]
+      const [type, start, endExclusive, amplitudeStart, amplitudeEnd] = _patterns[i]
       switch (type) {
         case 'fill':
           generateFillSamples({
@@ -121,7 +133,8 @@ export function generateSamples({
             channel,
             start,
             endExclusive,
-            amplitude,
+            amplitudeStart,
+            amplitudeEnd,
           })
           break
         case 'triangle':
@@ -131,7 +144,7 @@ export function generateSamples({
             channel,
             start,
             endExclusive,
-            amplitude,
+            amplitude: amplitudeStart,
           })
           break
         default:

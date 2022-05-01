@@ -23,7 +23,6 @@ describe('node > normalizeOffsetWithWindow', function () {
 		channelsCount: number,
 		channels: number[],
 		windowSamples: number,
-		baseAmplitude: number,
 		patternsActual: SamplesPattern[][],
 		patternsExpected: SamplesPattern[][],
 	}) => {

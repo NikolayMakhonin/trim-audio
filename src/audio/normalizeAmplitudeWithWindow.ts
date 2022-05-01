@@ -5,16 +5,22 @@ function _normalizeAmplitudeWithWindow({
   channelsCount,
   channels,
   coef,
+  maxMult,
   windowSamples,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   coef: number,
+  maxMult?: number,
   windowSamples: number,
 }) {
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
+
+  if (maxMult == null) {
+    maxMult = 1e16
+  }
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -33,25 +39,27 @@ function _normalizeAmplitudeWithWindow({
   function _normalize(i: number) {
     let maxJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
     for (let j = 0; j < maxJ; j++) {
-      const _max = maxPrev > max ? maxPrev + (max - maxPrev) * j / windowSamplesHalf : max
-      const mult = _max < EPSILON ? 1 : coef / _max
+      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
+      const multPrev = Math.min(maxMult, maxPrev < EPSILON ? maxMult : coef / maxPrev)
+      const _mult = multPrev >= mult ? mult : multPrev + (mult - multPrev) * j / windowSamplesHalf
       const index = (i - windowSamples2 + j) * channelsCount
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
-        samplesData[index + channel] = (value * mult)
+        samplesData[index + channel] = (value * _mult)
       }
     }
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
     maxJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
     for (let j = 0; j < maxJ; j++) {
-      const _max = maxNext > max ? max + (maxNext - max) * j / _windowSamplesHalf : max
-      const mult = _max < EPSILON ? 1 : coef / _max
+      const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
+      const multNext = Math.min(maxMult, maxNext < EPSILON ? maxMult : coef / maxNext)
+      const _mult = mult <= multNext ? mult : mult + (multNext - mult) * j / windowSamplesHalf
       const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
-        samplesData[index + channel] = correctSample(value * mult)
+        samplesData[index + channel] = correctSample(value * _mult)
       }
     }
   }
