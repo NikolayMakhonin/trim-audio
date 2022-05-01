@@ -155,55 +155,100 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	xit('separateChannels', function () {
+	it('peak', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
-				: channelsCount === 2 ? [[0, 1]]
+				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
 			coef            : [0.6],
-			separateChannels: [true],
-			position        : [0, 73, 99],
+			separateChannels: [false, true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, position, amplitude}) => [
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
-					['fill', position, position + 1, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0],
+					['fill', 0, 1, active ? 0.1 * amplitude : 0],
+					['fill', 99, 100, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
+			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] * sign(amplitude) : 0.1],
-					['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] * sign(amplitude) : 0],
+					['fill', 0, 1, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 1, windowSamples, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', windowSamples, windowSamples + Math.ceil(windowSamples / 2), active ? 0.3 * sign(amplitude) : 0.1, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', windowSamples + Math.ceil(windowSamples / 2), 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), 100 - windowSamples, active ? 0.6 * sign(amplitude) : 0.1, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 100 - windowSamples, 99, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 99, 100, active ? 0.6 * sign(amplitude) : 0.1],
 				]),
 			],
 		})
 	})
 
-	xit('not separateChannels', function () {
+	it('separateChannels', function () {
+		testVariants({
+			samplesCount : [100],
+			channelsCount: [1, 2, 3],
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1], [0], [1]]
+					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
+			coef            : [0.6],
+			separateChannels: [true],
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0.1],
+					['fill', 0, 1, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0],
+					['fill', 99, 100, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0],
+				]),
+			],
+			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					// ['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] * sign(amplitude) : 0.1],
+					// ['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] * sign(amplitude) : 0],
+
+					['fill', 0, 1, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 1, windowSamples, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', windowSamples, windowSamples + Math.ceil(windowSamples / 2), active ? 0.3 * sign(amplitude) : 0.1, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', windowSamples + Math.ceil(windowSamples / 2), 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), 100 - windowSamples, active ? 0.6 * sign(amplitude) : 0.1, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 100 - windowSamples, 99, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 99, 100, active ? 0.6 * sign(amplitude) : 0.1],
+				]),
+			],
+		})
+	})
+
+	it('not separateChannels', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0], [0, 1]]
 					: [[], [0], [0, 1], [0, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
 			coef            : [0.6],
 			separateChannels: [false],
-			position        : [0, 73, 99],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
-			patternsActual  : ({channelsCount, channels, position, amplitude}) => [
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
-					['fill', position, position + 1, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0],
+					['fill', 0, 100, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0.1],
+					['fill', 0, 1, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0],
+					['fill', 99, 100, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
+			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.15 * sign(amplitude) : 0.1],
-					['fill', position, position + 1, active ? [0.45, 0.3, 0.15][channel] * sign(amplitude) : 0],
+					['fill', 0, 1, active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1],
+					['fill', 1, windowSamples, active ? [0.3, 0.2, 0.1][channel] * sign(amplitude) : 0.1],
+					['fill', windowSamples, windowSamples + Math.ceil(windowSamples / 2), active ? [0.3, 0.2, 0.1][channel] * sign(amplitude) : 0.1, active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1],
+					['fill', windowSamples + Math.ceil(windowSamples / 2), 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1],
+					['fill', 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), 100 - windowSamples, active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1, active ? [0.3, 0.2, 0.1][channel] * sign(amplitude) : 0.1],
+					['fill', 100 - windowSamples, 99, active ? [0.3, 0.2, 0.1][channel] * sign(amplitude) : 0.1],
+					['fill', 99, 100, active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1],
 				]),
 			],
 		})
