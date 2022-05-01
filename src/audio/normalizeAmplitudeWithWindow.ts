@@ -39,10 +39,10 @@ function _normalizeAmplitudeWithWindow({
   function _normalize(i: number) {
     let maxJ = Math.min(windowSamplesHalf, samplesCount - i + windowSamples2)
     for (let j = 0; j < maxJ; j++) {
+      const index = (i - windowSamples2 + j) * channelsCount
       const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
       const multPrev = Math.min(maxMult, maxPrev < EPSILON ? maxMult : coef / maxPrev)
       const _mult = multPrev >= mult ? mult : multPrev + (mult - multPrev) * j / windowSamplesHalf
-      const index = (i - windowSamples2 + j) * channelsCount
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
@@ -52,10 +52,10 @@ function _normalizeAmplitudeWithWindow({
     const _windowSamplesHalf = windowSamples - windowSamplesHalf
     maxJ = Math.min(_windowSamplesHalf, samplesCount - i + windowSamples2 - windowSamplesHalf)
     for (let j = 0; j < maxJ; j++) {
+      const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
       const mult = Math.min(maxMult, max < EPSILON ? maxMult : coef / max)
       const multNext = Math.min(maxMult, maxNext < EPSILON ? maxMult : coef / maxNext)
-      const _mult = mult <= multNext ? mult : mult + (multNext - mult) * j / windowSamplesHalf
-      const index = (i - windowSamples2 + j + windowSamplesHalf) * channelsCount
+      const _mult = mult <= multNext ? mult : mult + (multNext - mult) * j / _windowSamplesHalf
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
         const value = samplesData[index + channel]
