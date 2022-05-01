@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
-import {generateSamples, SamplesPattern} from './test/generateSamples'
+import {SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {saveTempFileMp3, saveTempFileWav} from './test/saveTempFileMp3'
-import {loadAssetAudio} from './test/loadAssetAudio'
-import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
 import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 import {sign} from './test/sign'
 
@@ -38,7 +34,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			maxDiff: 1e-7,
 			patternsActual,
 			patternsExpected,
-			handle(samplesData, channelsCount, samplesCount) {
+			handle(samplesData, channelsCount) {
 				normalizeAmplitudeWithWindow({
 					samplesData,
 					channelsCount,
@@ -58,7 +54,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50], // 90, 98, 99, 100],
+			windowSamples   : [2, 1, 3, 7, 20, 50],
 			coef            : [0, 1],
 			separateChannels: [false, true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -82,7 +78,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [2, 1, 3, 7, 20, 50], // 90, 98, 99, 100],
+			windowSamples   : [2, 1, 3, 7, 20, 50],
 			coef            : [0.6],
 			separateChannels: [false, true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -106,7 +102,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 3, 7, 20, 50], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 3, 7, 20, 50],
 			coef            : [0.6],
 			separateChannels: [false, true],
 			amplitude       : [1, 0, 0.5, -1, -0.25],
@@ -134,7 +130,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 4, 5, 20, 25, 50], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25, 50],
 			coef            : [0.6],
 			separateChannels: [false, true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -155,14 +151,44 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 		})
 	})
 
-	it('peak', function () {
+	it('peak middle', function () {
 		testVariants({
 			samplesCount : [100],
 			channelsCount: [1, 2, 3],
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 5, 25, 50],
+			coef            : [0.6],
+			separateChannels: [false, true],
+			amplitude       : [0, 1, 0.5, -1, -0.25],
+			patternsActual  : ({channelsCount, channels, amplitude}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
+					['fill', 50, 51, active ? 0.1 * amplitude : 0],
+				]),
+			],
+			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill', 0, 50 - windowSamples + Math.ceil(windowSamples / 2), active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 50 - windowSamples + Math.ceil(windowSamples / 2), 50, active ? 0.6 * sign(amplitude) : 0.1, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 50, 51, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 51, 50 + windowSamples, active ? 0.3 * sign(amplitude) : 0.1],
+					['fill', 50 + windowSamples, 50 + windowSamples + Math.ceil(windowSamples / 2), active ? 0.3 * sign(amplitude) : 0.1, active ? 0.6 * sign(amplitude) : 0.1],
+					['fill', 50 + windowSamples + Math.ceil(windowSamples / 2), 100, active ? 0.6 * sign(amplitude) : 0.1],
+				]),
+			],
+		})
+	})
+
+	it('peak start/end', function () {
+		testVariants({
+			samplesCount : [100],
+			channelsCount: [1, 2, 3],
+			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1], [0], [1]]
+					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25],
 			coef            : [0.6],
 			separateChannels: [false, true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -194,7 +220,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1], [0], [1]]
 					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25],
 			coef            : [0.6],
 			separateChannels: [true],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
@@ -229,7 +255,7 @@ describe('node > normalizeAmplitudeWithWindow', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0], [0, 1]]
 					: [[], [0], [0, 1], [0, 2], [0, 1, 2]],
-			windowSamples   : [10, 2, 1, 4, 5, 20, 25], // 90, 98, 99, 100],
+			windowSamples   : [10, 2, 1, 4, 5, 20, 25],
 			coef            : [0.6],
 			separateChannels: [false],
 			amplitude       : [0, 1, 0.5, -1, -0.25],
