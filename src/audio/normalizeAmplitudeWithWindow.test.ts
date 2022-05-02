@@ -29,11 +29,16 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 		patternsExpected: SamplesPattern[][],
 	}) => {
 		testSamplesWithPatterns({
-			samplesCount,
-			channelsCount,
-			maxDiff: 1e-7,
-			patternsActual,
-			patternsExpected,
+			actual: {
+				samplesCount,
+				channelsCount,
+				patterns: patternsActual,
+			},
+			expect: {
+				samplesCount,
+				channelsCount,
+				patterns: patternsExpected,
+			},
 			handle(samplesData, channelsCount) {
 				normalizeAmplitudeWithWindow({
 					samplesData,

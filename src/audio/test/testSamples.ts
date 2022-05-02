@@ -3,77 +3,95 @@ import {checkSamples} from './checkSamples'
 import {generateSamples, SamplesPattern} from './generateSamples'
 
 export function testSamples({
-  samplesCount,
-  channelsCount,
-  fillData,
+  actual,
+  expect,
   handle,
   maxDiff,
 }: {
-  samplesCount: number,
-  channelsCount: number,
-  fillData: (
-    samplesDataActual: Float32Array, samplesDataExpect: Float32Array,
-    channelsCount: number, samplesCount: number,
-  ) => void,
+  actual: {
+    samplesCount: number,
+    channelsCount: number,
+    fillData: (
+      samplesData: Float32Array, channelsCount: number, samplesCount: number,
+    ) => void,
+  },
+  expect: {
+    samplesCount: number,
+    channelsCount: number,
+    fillData: (
+      samplesData: Float32Array, channelsCount: number, samplesCount: number,
+    ) => void,
+  },
   handle: (samplesData: Float32Array, channelsCount: number, samplesCount: number) => void,
   maxDiff?: number,
 }) {
-  const samplesDataActual = new Float32Array(samplesCount * channelsCount)
-  const samplesDataExpect = new Float32Array(samplesCount * channelsCount)
+  const _actual = {
+    samplesData  : new Float32Array(actual.samplesCount * actual.channelsCount),
+    channelsCount: actual.channelsCount,
+  }
+  const _expect = {
+    samplesData  : new Float32Array(expect.samplesCount * expect.channelsCount),
+    channelsCount: expect.channelsCount,
+  }
 
-  fillData(samplesDataActual, samplesDataExpect, channelsCount, samplesCount)
-
-  handle(samplesDataActual, channelsCount, samplesCount)
+  handle(_actual.samplesData, _actual.channelsCount, actual.samplesCount)
 
   checkSamples({
-    actual: {
-      samplesData: samplesDataActual,
-      channelsCount,
-    },
-    expect: {
-      samplesData: samplesDataExpect,
-      channelsCount,
-    },
+    actual: _actual,
+    expect: _expect,
     maxDiff,
   })
 }
 
 export function testSamplesWithPatterns({
-  samplesCount,
-  channelsCount,
+  actual,
+  expect,
   maxDiff,
-  patternsActual,
-  patternsExpected,
   handle,
 }: {
-  samplesCount: number,
-  channelsCount: number,
+  actual: {
+    samplesCount: number,
+    channelsCount: number,
+    patterns: SamplesPattern[][],
+  },
+  expect: {
+    samplesCount: number,
+    channelsCount: number,
+    patterns: SamplesPattern[][],
+  },
   maxDiff?: number,
-  patternsActual: SamplesPattern[][],
-  patternsExpected: SamplesPattern[][],
   handle: (samplesData: Float32Array, channelsCount: number, samplesCount: number) => void,
 }) {
   return testSamples({
-    samplesCount,
-    channelsCount,
-    maxDiff,
-    fillData(
-      samplesDataActual,
-      samplesDataExpect,
-      channelsCount,
-      samplesCount,
-    ) {
-      generateSamples({
-        samplesData: samplesDataActual,
+    actual: {
+      samplesCount : actual.samplesCount,
+      channelsCount: actual.channelsCount,
+      fillData(
+        samplesData,
         channelsCount,
-        patterns   : patternsActual,
-      })
-      generateSamples({
-        samplesData: samplesDataExpect,
-        channelsCount,
-        patterns   : patternsExpected,
-      })
+      ) {
+        generateSamples({
+          samplesData: samplesData,
+          channelsCount,
+          patterns   : actual.patterns,
+        })
+      },
     },
+    expect: {
+      samplesCount : expect.samplesCount,
+      channelsCount: expect.channelsCount,
+      fillData(
+        samplesData,
+        channelsCount,
+      ) {
+        generateSamples({
+          samplesData: samplesData,
+          channelsCount,
+          patterns   : expect.patterns,
+        })
+      },
+    },
+    maxDiff,
     handle,
   })
 }
