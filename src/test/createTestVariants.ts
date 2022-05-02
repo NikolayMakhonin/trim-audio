@@ -98,6 +98,6 @@ export function createTestVariants<TArgs extends object>(
       }
     }
 
-    console.log('iterations: ' + iteration)
+    console.log('variants: ' + iteration)
   }
 }
