@@ -224,15 +224,15 @@ describe('audio > trimAudio', function () {
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 
-			windowSamplesStart       : [16, 8, 4, 2],
-			minContentSamplesStart   : [16, 8, 4, 2, 1],
+			windowSamplesStart       : [16, 8, 2],
+			minContentSamplesStart   : [16, 8, 2, 1],
 			minContentDispersionStart: [1],
-			maxSilenceSamplesStart   : [16, 100],
+			maxSilenceSamplesStart   : [16],
 
-			windowSamplesEnd       : [16, 8, 4, 2],
-			minContentSamplesEnd   : [16, 8, 4, 2, 1],
+			windowSamplesEnd       : [16, 8, 2],
+			minContentSamplesEnd   : [16, 8, 2, 1],
 			minContentDispersionEnd: [1],
-			maxSilenceSamplesEnd   : [16, 100],
+			maxSilenceSamplesEnd   : [16],
 
 			position          : [0, 1, 50, 53, 83, 84],
 			samplesCountExpect: [16],
@@ -246,6 +246,73 @@ describe('audio > trimAudio', function () {
 					['fill-noise', 0, 16, active ? 1 : 0],
 				]),
 			],
+		})
+	})
+
+	it('start/end with space', function () {
+		testVariants({
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+
+			windowSamplesStart       : [8],
+			minContentSamplesStart   : [21],
+			minContentDispersionStart: [1],
+			maxSilenceSamplesStart   : [5],
+
+			windowSamplesEnd       : [12],
+			minContentSamplesEnd   : [37],
+			minContentDispersionEnd: [1],
+			maxSilenceSamplesEnd   : [13],
+
+			samplesCountExpect: [77],
+			patternsActual    : ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 10, 18, active ? 1 : 0],
+					['fill-noise', 23, 35, active ? 1 : 0],
+					['fill-noise', 50, 62, active ? 1 : 0],
+					['fill-noise', 75, 87, active ? 1 : 0],
+				]),
+			],
+			patternsExpect: ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 0, 8, active ? 1 : 0],
+					['fill-noise', 13, 25, active ? 1 : 0],
+					['fill-noise', 40, 52, active ? 1 : 0],
+					['fill-noise', 65, 77, active ? 1 : 0],
+				]),
+			],
+		})
+	})
+
+	it('start/end with space silence', function () {
+		testVariants({
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+
+			windowSamplesStart       : [10],
+			minContentSamplesStart   : [30],
+			minContentDispersionStart: [1],
+			maxSilenceSamplesStart   : [10],
+
+			windowSamplesEnd       : [10],
+			minContentSamplesEnd   : [30],
+			minContentDispersionEnd: [1],
+			maxSilenceSamplesEnd   : [9],
+
+			samplesCountExpect: [0],
+			patternsActual    : ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 30, 40, active ? 1 : 0],
+					['fill-noise', 50, 60, active ? 1 : 0],
+				]),
+			],
+			patternsExpect: [null],
 		})
 	})
 })
