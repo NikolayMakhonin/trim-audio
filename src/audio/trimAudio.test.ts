@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import {normalizeOffsetSimple} from './normalizeOffsetSimple'
 import {SamplesPattern} from './test/generateSamples'
 import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
