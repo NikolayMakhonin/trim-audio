@@ -6,7 +6,7 @@ import {mapChannels} from './test/mapChannels'
 import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 import {sign} from './test/sign'
 
-describe('node > normalizeAmplitudeWithWindow', function () {
+describe('audio > normalizeAmplitudeWithWindow', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({

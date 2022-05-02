@@ -5,7 +5,7 @@ import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
 
-describe('node > normalizeOffsetWithWindow', function () {
+describe('audio > normalizeOffsetWithWindow', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({

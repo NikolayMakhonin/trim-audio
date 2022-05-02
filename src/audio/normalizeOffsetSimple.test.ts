@@ -5,7 +5,7 @@ import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 
-describe('node > normalizeOffsetSimple', function () {
+describe('audio > normalizeOffsetSimple', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({

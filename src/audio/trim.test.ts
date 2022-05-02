@@ -5,7 +5,7 @@
 // import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
 // import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 //
-// describe('node > trim', function () {
+// describe('audio > trim', function () {
 // 	this.timeout(30000)
 //
 // 	function testSilence(volume: number, normalize: (samples: AudioSamples) => void) {

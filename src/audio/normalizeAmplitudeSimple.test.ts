@@ -6,7 +6,7 @@ import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {sign} from './test/sign'
 
-describe('node > normalizeAmplitudeSimple', function () {
+describe('audio > normalizeAmplitudeSimple', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({
