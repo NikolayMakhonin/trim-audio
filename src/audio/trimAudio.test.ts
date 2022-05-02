@@ -16,12 +16,12 @@ describe('audio > trimAudio', function () {
 
 		windowSamplesStart,
 		minContentSamplesStart,
-		minContentDecibelStart,
+		minContentDispersionStart,
 		maxSilenceSamplesStart,
 
 		windowSamplesEnd,
 		minContentSamplesEnd,
-		minContentDecibelEnd,
+		minContentDispersionEnd,
 		maxSilenceSamplesEnd,
 
 		patternsActual,
@@ -33,12 +33,12 @@ describe('audio > trimAudio', function () {
 		
 		windowSamplesStart: number,
 		minContentSamplesStart: number,
-		minContentDecibelStart: number,
+		minContentDispersionStart: number,
 		maxSilenceSamplesStart: number,
 		
 		windowSamplesEnd: number,
 		minContentSamplesEnd: number,
-		minContentDecibelEnd: number,
+		minContentDispersionEnd: number,
 		maxSilenceSamplesEnd: number,
 		
 		patternsActual: SamplesPattern[][],
@@ -56,16 +56,16 @@ describe('audio > trimAudio', function () {
 					channelsCount,
 					channels,
 					start: {
-						windowSamples    : windowSamplesStart,
-						minContentSamples: minContentSamplesStart,
-						minContentDecibel: minContentDecibelStart,
-						maxSilenceSamples: maxSilenceSamplesStart,
+						windowSamples       : windowSamplesStart,
+						minContentSamples   : minContentSamplesStart,
+						minContentDispersion: minContentDispersionStart,
+						maxSilenceSamples   : maxSilenceSamplesStart,
 					},
 					end: {
-						windowSamples    : windowSamplesEnd,
-						minContentSamples: minContentSamplesEnd,
-						minContentDecibel: minContentDecibelEnd,
-						maxSilenceSamples: maxSilenceSamplesEnd,
+						windowSamples       : windowSamplesEnd,
+						minContentSamples   : minContentSamplesEnd,
+						minContentDispersion: minContentDispersionEnd,
+						maxSilenceSamples   : maxSilenceSamplesEnd,
 					},
 				})
 			},
@@ -80,15 +80,15 @@ describe('audio > trimAudio', function () {
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
 			
-			windowSamplesStart    : [10],
-			minContentSamplesStart: [10],
-			minContentDecibelStart: [10],
-			maxSilenceSamplesStart: [10],
+			windowSamplesStart       : [10],
+			minContentSamplesStart   : [10],
+			minContentDispersionStart: [10],
+			maxSilenceSamplesStart   : [10],
 
-			windowSamplesEnd    : [10],
-			minContentSamplesEnd: [10],
-			minContentDecibelEnd: [10],
-			maxSilenceSamplesEnd: [10],
+			windowSamplesEnd       : [10],
+			minContentSamplesEnd   : [10],
+			minContentDispersionEnd: [10],
+			maxSilenceSamplesEnd   : [10],
 			
 			amplitude     : [0, 1, 0.5, -1, -0.25],
 			patternsActual: ({channelsCount, channels, amplitude}) => [

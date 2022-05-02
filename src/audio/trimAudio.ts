@@ -1,5 +1,8 @@
 import {generateIndexArray} from './helpers'
 
+// max dispersion of normalized audio = 1
+// max decibel of normalized audio = 0
+
 export function searchContent({
   samplesData,
   channelsCount,
@@ -100,25 +103,17 @@ export function trimAudio({
   start?: {
     windowSamples: number,
     minContentSamples: number,
-    minContentDecibel: number,
+    minContentDispersion: number,
     maxSilenceSamples: number,
   },
   end?: {
     windowSamples: number,
     minContentSamples: number,
-    minContentDecibel: number,
+    minContentDispersion: number,
     maxSilenceSamples: number,
   },
 }) {
   const samplesCount = Math.floor(samplesData.length / channelsCount)
-
-  function calcMinDispersion(silenceLevel: number) {
-    const result = 10 ** silenceLevel
-    return result * result
-  }
-
-  const minContentDispersionStart = start && calcMinDispersion(start.minContentDecibel)
-  const minContentDispersionEnd = end && calcMinDispersion(end.minContentDecibel)
 
   const trimStart = !start ? 0 : searchContent({
     samplesData,
@@ -128,7 +123,7 @@ export function trimAudio({
     windowSamples       : start.windowSamples,
     backward            : false,
     minContentSamples   : start.minContentSamples,
-    minContentDispersion: minContentDispersionStart,
+    minContentDispersion: start.minContentDispersion,
     maxSilenceSamples   : start.maxSilenceSamples,
   })
 
@@ -140,7 +135,7 @@ export function trimAudio({
     windowSamples       : start.windowSamples,
     backward            : true,
     minContentSamples   : end.minContentSamples,
-    minContentDispersion: minContentDispersionEnd,
+    minContentDispersion: start.minContentDispersion,
     maxSilenceSamples   : end.maxSilenceSamples,
   })
 

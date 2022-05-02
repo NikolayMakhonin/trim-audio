@@ -27,3 +27,9 @@ export function generateIndexArray(length: number): number[] {
   }
   return array
 }
+
+export function decibelToDispersion(decibel: number) {
+  // see: https://en.wikipedia.org/wiki/Decibel
+  const result = 10 ** (decibel / 10)
+  return result
+}
