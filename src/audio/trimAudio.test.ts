@@ -315,4 +315,40 @@ describe('audio > trimAudio', function () {
 			patternsExpect: [null],
 		})
 	})
+
+	it('start/end skip space', function () {
+		testVariants({
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+
+			windowSamplesStart       : [4],
+			minContentSamplesStart   : [11],
+			minContentDispersionStart: [1],
+			maxSilenceSamplesStart   : [3],
+
+			windowSamplesEnd       : [4],
+			minContentSamplesEnd   : [11],
+			minContentDispersionEnd: [1],
+			maxSilenceSamplesEnd   : [3],
+
+			samplesCountExpect: [11],
+			patternsActual    : ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 10, 14, active ? 1 : 0],
+					['fill-noise', 18, 22, active ? 1 : 0],
+					['fill-noise', 25, 29, active ? 1 : 0],
+					['fill-noise', 33, 37, active ? 1 : 0],
+				]),
+			],
+			patternsExpect: ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 0, 4, active ? 1 : 0],
+					['fill-noise', 7, 11, active ? 1 : 0],
+				]),
+			],
+		})
+	})
 })
