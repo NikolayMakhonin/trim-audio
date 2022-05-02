@@ -147,6 +147,9 @@ export function generateSamples({
   channelsCount: number,
   patterns: SamplesPattern[][],
 }) {
+  if (!patterns) {
+    return
+  }
   for (let channel = 0; channel < channelsCount; channel++) {
     const _patterns = patterns[channel]
     for (let i = 0, len = _patterns.length; i < len; i++) {

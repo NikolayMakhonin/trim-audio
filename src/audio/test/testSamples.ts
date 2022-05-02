@@ -33,10 +33,13 @@ export function testSamples({
     samplesData  : new Float32Array(actual.samplesCount * actual.channelsCount),
     channelsCount: actual.channelsCount,
   }
+  actual.fillData(_actual.samplesData, actual.channelsCount, actual.samplesCount)
+
   const _expect = {
     samplesData  : new Float32Array(expect.samplesCount * expect.channelsCount),
     channelsCount: expect.channelsCount,
   }
+  expect.fillData(_expect.samplesData, expect.channelsCount, expect.samplesCount)
 
   _actual.samplesData = handle(
     _actual.samplesData,
