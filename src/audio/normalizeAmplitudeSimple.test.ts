@@ -27,7 +27,8 @@ describe('audio > normalizeAmplitudeSimple', function () {
 		separateChannels: boolean,
 	}) => {
 		testSamplesWithPatterns({
-			actual: {
+			maxDiff: 1e-7,
+			actual : {
 				samplesCount,
 				channelsCount,
 				patterns: patternsActual,

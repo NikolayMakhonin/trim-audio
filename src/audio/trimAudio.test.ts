@@ -46,7 +46,8 @@ describe('audio > trimAudio', function () {
 		patternsExpect: SamplesPattern[][],
 	}) => {
 		testSamplesWithPatterns({
-			actual: {
+			maxDiff: 1e-7,
+			actual : {
 				samplesCount: samplesCountActual,
 				channelsCount,
 				patterns    : patternsActual,
