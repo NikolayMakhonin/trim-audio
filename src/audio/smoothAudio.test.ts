@@ -56,16 +56,19 @@ describe('audio > smoothAudio', function () {
 			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
-			startSamples  : [0],
-			endSamples    : [0],
+			startSamples  : [0, 1, 10, 50],
+			endSamples    : [0, 1, 10, 50],
 			patternsActual: ({channelsCount, channels}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill-noise', 0, 100, 1],
+					['fill', 0, 100, 1],
 				]),
 			],
-			patternsExpect: ({channelsCount, channels}) => [
+			patternsExpect: ({channelsCount, channels, startSamples, endSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill-noise', 0, 100, 1],
+					['fill', 0, 100, 1],
+					['fill', 0, startSamples, active ? -1 : 0, 0],
+					['fill', 100 - endSamples - 1, 99, 0, active ? -1 : 0],
+					['fill', 99, 100, active && endSamples > 0 ? -1 : 0],
 				]),
 			],
 		})
