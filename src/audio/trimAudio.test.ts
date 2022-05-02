@@ -90,15 +90,19 @@ describe('audio > trimAudio', function () {
 
 			windowSamplesStart       : [2, 10, 100],
 			minContentSamplesStart   : [1, 10, 100],
-			minContentDispersionStart: ({amplitude, windowSamplesStart}) => [
-				amplitude * amplitude * windowSamplesStart / (windowSamplesStart - 1) + 1e-8,
+			minContentDispersionStart: ({amplitude, windowSamplesStart, channels}) => [
+				amplitude * amplitude
+				* (windowSamplesStart * channels.length) / ((windowSamplesStart * channels.length) - 1)
+				+ 1e-8,
 			],
 			maxSilenceSamplesStart: [10],
 
 			windowSamplesEnd       : [2, 10, 100],
 			minContentSamplesEnd   : [1, 10, 100],
-			minContentDispersionEnd: ({amplitude, windowSamplesEnd}) => [
-				amplitude * amplitude * windowSamplesEnd / (windowSamplesEnd - 1) + 1e-8,
+			minContentDispersionEnd: ({amplitude, windowSamplesEnd, channels}) => [
+				amplitude * amplitude
+				* (windowSamplesEnd * channels.length) / ((windowSamplesEnd * channels.length) - 1)
+				+ 1e-8,
 			],
 			maxSilenceSamplesEnd: [10],
 			
@@ -120,19 +124,23 @@ describe('audio > trimAudio', function () {
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
 
-			amplitude: [0, 1, 0.5, -1, -0.25],
+			amplitude: [1, 0.5, -1, -0.25, 1e-8, -1e-8],
 
 			windowSamplesStart       : [2, 10, 100],
 			minContentSamplesStart   : [1, 10, 100],
-			minContentDispersionStart: ({amplitude, windowSamplesStart}) => [
-				amplitude * amplitude * windowSamplesStart / (windowSamplesStart - 1) - 1e-8,
+			minContentDispersionStart: ({amplitude, windowSamplesStart, channels}) => [
+				amplitude * amplitude
+				* (windowSamplesStart * channels.length) / ((windowSamplesStart * channels.length) - 1)
+				- 1e-8,
 			],
 			maxSilenceSamplesStart: [10],
 
 			windowSamplesEnd       : [2, 10, 100],
 			minContentSamplesEnd   : [1, 10, 100],
-			minContentDispersionEnd: ({amplitude, windowSamplesEnd}) => [
-				amplitude * amplitude * windowSamplesEnd / (windowSamplesEnd - 1) - 1e-8,
+			minContentDispersionEnd: ({amplitude, windowSamplesEnd, channels}) => [
+				amplitude * amplitude
+				* (windowSamplesEnd * channels.length) / ((windowSamplesEnd * channels.length) - 1)
+				- 1e-8,
 			],
 			maxSilenceSamplesEnd: [10],
 

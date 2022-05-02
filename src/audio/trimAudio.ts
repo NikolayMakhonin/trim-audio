@@ -47,6 +47,7 @@ export function searchContent({
       sum += value
       sumSqr += value * value
     }
+
     if (i >= windowSamples) {
       for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
         const channel = channels[nChannel]
@@ -59,7 +60,9 @@ export function searchContent({
         sum -= prevValue
         sumSqr -= prevValue * prevValue
       }
+    }
 
+    if (i >= windowSamples - 1) {
       const count = windowSamples * channelsLength
       const avg = sum / count
       const sqrAvg = sumSqr / count
@@ -67,15 +70,15 @@ export function searchContent({
 
       if (dispersion > minContentDispersion) {
         if (contentStartEnd === 0) {
-          contentStartIndex = i - windowSamples
+          contentStartIndex = i + 1 - windowSamples
         }
-        contentStartEnd = i
-        if (i - contentStartIndex > minContentSamples) {
+        contentStartEnd = i + 1
+        if (i + 1 - contentStartIndex > minContentSamples) {
           return backward
             ? samplesCount - 1 - contentStartIndex
             : contentStartIndex
         }
-      } else if (i - contentStartEnd > maxSilenceSamples) {
+      } else if (i + 1 - contentStartEnd > maxSilenceSamples) {
         contentStartEnd = 0
       }
     }
@@ -127,7 +130,7 @@ export function trimAudio({
     maxSilenceSamples   : start.maxSilenceSamples,
   })
 
-  const trimEnd = !end ? samplesCount - 1 : searchContent({
+  const trimEndExclusive = !end ? samplesCount : searchContent({
     samplesData,
     channelsCount,
     samplesCount        : Math.min(samplesCount, samplesCount - trimStart + start.windowSamples),
@@ -137,13 +140,13 @@ export function trimAudio({
     minContentSamples   : end.minContentSamples,
     minContentDispersion: start.minContentDispersion,
     maxSilenceSamples   : end.maxSilenceSamples,
-  })
+  }) + 1
 
-  return trimStart >= trimEnd
+  return trimStart >= trimEndExclusive
     ? new Float32Array(0)
     : new Float32Array(
       samplesData.buffer,
       trimStart * channelsCount,
-      trimEnd * channelsCount,
+      trimEndExclusive * channelsCount,
     )
 }
