@@ -1,14 +1,35 @@
-function _searchContent(
+import {generateIndexArray} from './helpers'
+
+export function searchContent({
+  samplesData,
+  channelsCount,
+  samplesCount,
+  channels,
+  windowSamples,
+  backward,
+  minContentSamples,
+  minContentDispersion,
+  maxSilenceSamples,
+}: {
   samplesData: Float32Array,
   channelsCount: number,
   samplesCount: number,
-  channel: number,
+  channels?: number[],
   windowSamples: number,
   backward: boolean,
   minContentSamples: number,
   minContentDispersion: number,
   maxSilenceSamples: number,
-) {
+}) {
+  if (channels == null) {
+    channels = generateIndexArray(channelsCount)
+  }
+
+  const channelsLength = channels.length
+  if (channelsLength === 0) {
+    return backward ? samplesCount - 1 : 0
+  }
+
   let contentStartIndex = 0
   let contentStartEnd = 0
 
@@ -16,23 +37,30 @@ function _searchContent(
   let sumSqr = 0
 
   for (let i = 0; i < samplesCount; i++) {
-    const index = (backward ? samplesCount - 1 - i : i) * channelsCount + channel
-    const value = samplesData[index]
-    sum += value
-    sumSqr += value * value
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      const channel = channels[nChannel]
+      const index = (backward ? samplesCount - 1 - i : i) * channelsCount + channel
+      const value = samplesData[index]
+      sum += value
+      sumSqr += value * value
+    }
     if (i >= windowSamples) {
-      const prevIndex = (
-        backward
-          ? samplesCount - 1 - (i - windowSamples)
-          : (i - windowSamples)
-      ) * channelsCount + channel
-      const prevValue = samplesData[prevIndex]
-      sum -= prevValue
-      sumSqr -= prevValue * prevValue
+      for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+        const channel = channels[nChannel]
+        const prevIndex = (
+          backward
+            ? samplesCount - 1 - (i - windowSamples)
+            : (i - windowSamples)
+        ) * channelsCount + channel
+        const prevValue = samplesData[prevIndex]
+        sum -= prevValue
+        sumSqr -= prevValue * prevValue
+      }
 
-      const avg = sum / windowSamples
-      const sqrAvg = sumSqr / windowSamples
-      const dispersion = (sqrAvg - avg * avg) * windowSamples / (windowSamples - 1)
+      const count = windowSamples * channelsLength
+      const avg = sum / count
+      const sqrAvg = sumSqr / count
+      const dispersion = (sqrAvg - avg * avg) * count / (count - 1)
 
       if (dispersion > minContentDispersion) {
         if (contentStartEnd === 0) {
@@ -51,7 +79,7 @@ function _searchContent(
   }
 
   if (contentStartEnd === 0) {
-    return backward ? samplesCount : 0
+    return backward ? samplesCount - 1 : 0
   }
 
   return backward
@@ -59,48 +87,16 @@ function _searchContent(
     : contentStartIndex
 }
 
-export function searchContent({
-  samplesData,
-  channelsCount,
-  samplesCount,
-  channel,
-  windowSamples,
-  backward,
-  minContentSamples,
-  minContentDispersion,
-  maxSilenceSamples,
-}: {
-  samplesData: Float32Array,
-  channelsCount: number,
-  samplesCount: number,
-  channel: number,
-  windowSamples: number,
-  backward: boolean,
-  minContentSamples: number,
-  minContentDispersion: number,
-  maxSilenceSamples: number,
-}) {
-  return _searchContent(
-    samplesData,
-    channelsCount,
-    samplesCount,
-    channel,
-    windowSamples,
-    backward,
-    minContentSamples,
-    minContentDispersion,
-    maxSilenceSamples,
-  )
-}
-
 export function trimAudio({
   samplesData,
   channelsCount,
+  channels,
   start,
   end,
 }: {
   samplesData: Float32Array,
   channelsCount: number,
+  channels?: number[],
   start?: {
     windowSamples: number,
     minContentSamples: number,
@@ -124,47 +120,35 @@ export function trimAudio({
   const minContentDispersionStart = start && calcMinDispersion(start.minContentDecibel)
   const minContentDispersionEnd = end && calcMinDispersion(end.minContentDecibel)
 
-  let trimStartMin = 0
-  let trimEndMax = samplesCount
+  const trimStart = !start ? 0 : searchContent({
+    samplesData,
+    channelsCount,
+    samplesCount,
+    channels,
+    windowSamples       : start.windowSamples,
+    backward            : false,
+    minContentSamples   : start.minContentSamples,
+    minContentDispersion: minContentDispersionStart,
+    maxSilenceSamples   : start.maxSilenceSamples,
+  })
 
-  for (let channel = 0; channel < channelsCount; channel++) {
-    const trimStart = !start ? 0 : _searchContent(
-      samplesData,
-      channelsCount,
-      samplesCount,
-      channel,
-      start.windowSamples,
-      false,
-      start.minContentSamples,
-      minContentDispersionStart,
-      start.maxSilenceSamples,
-    )
+  const trimEnd = !end ? samplesCount - 1 : searchContent({
+    samplesData,
+    channelsCount,
+    samplesCount        : Math.min(samplesCount, samplesCount - trimStart + start.windowSamples),
+    channels,
+    windowSamples       : start.windowSamples,
+    backward            : true,
+    minContentSamples   : end.minContentSamples,
+    minContentDispersion: minContentDispersionEnd,
+    maxSilenceSamples   : end.maxSilenceSamples,
+  })
 
-    const trimEnd = !end ? samplesCount - 1 : _searchContent(
-      samplesData,
-      channelsCount,
-      Math.min(samplesCount, samplesCount - trimStart + start.windowSamples),
-      channel,
-      start.windowSamples,
-      true,
-      end.minContentSamples,
-      minContentDispersionEnd,
-      end.maxSilenceSamples,
-    )
-
-    if (trimStart < trimStartMin) {
-      trimStartMin = trimStart
-    }
-    if (trimEnd > trimEndMax) {
-      trimEndMax = trimEnd
-    }
-  }
-
-  return trimStartMin >= trimEndMax
+  return trimStart >= trimEnd
     ? new Float32Array(0)
     : new Float32Array(
       samplesData.buffer,
-      trimStartMin * channelsCount,
-      trimEndMax * channelsCount,
+      trimStart * channelsCount,
+      trimEnd * channelsCount,
     )
 }
