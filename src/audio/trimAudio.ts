@@ -28,6 +28,13 @@ export function searchContent({
   start?: number,
   endExclusive?: number,
 }) {
+  if (windowSamples < 2) {
+    throw new Error('windowSamples should be >= 2')
+  }
+  if (windowSamples > samplesCount) {
+    windowSamples = samplesCount
+  }
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }

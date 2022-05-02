@@ -15,6 +15,15 @@ function _normalizeAmplitudeWithWindow({
   maxMult?: number,
   windowSamples: number,
 }) {
+  const samplesCount = Math.floor(samplesData.length / channelsCount)
+  if (windowSamples < 1) {
+    throw new Error('windowSamples should be >= 1')
+  }
+  const samplesCountHalf = Math.floor(samplesCount / 2)
+  if (windowSamples > samplesCountHalf) {
+    windowSamples = samplesCountHalf
+  }
+
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
 
@@ -31,7 +40,6 @@ function _normalizeAmplitudeWithWindow({
     return
   }
 
-  const samplesCount = Math.floor(samplesData.length / channelsCount)
   let maxPrev = 0
   let max = 0
   let maxNext = 0

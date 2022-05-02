@@ -11,10 +11,18 @@ function _normalizeOffsetWithWindow({
   channel: number,
   windowSamples: number,
 }) {
+  const samplesCount = Math.floor(samplesData.length / channelsCount)
+  if (windowSamples < 1) {
+    throw new Error('windowSamples should be >= 1')
+  }
+  const samplesCountHalf = Math.floor(samplesCount / 2)
+  if (windowSamples > samplesCountHalf) {
+    windowSamples = samplesCountHalf
+  }
+
   const windowSamplesHalf = Math.ceil(windowSamples / 2)
   const windowSamples2 = windowSamples * 2
 
-  const samplesCount = Math.floor(samplesData.length / channelsCount)
   let offsetPrev = 0
   let offset = 0
   let offsetNext = 0
