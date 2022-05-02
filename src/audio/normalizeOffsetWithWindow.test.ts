@@ -14,14 +14,14 @@ describe('audio > normalizeOffsetWithWindow', function () {
 		channels,
 		windowSamples,
 		patternsActual,
-		patternsExpected,
+		patternsExpect,
 	}: {
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
 		windowSamples: number,
 		patternsActual: SamplesPattern[][],
-		patternsExpected: SamplesPattern[][],
+		patternsExpect: SamplesPattern[][],
 	}) => {
 		testSamplesWithPatterns({
 			actual: {
@@ -32,7 +32,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 			expect: {
 				samplesCount,
 				channelsCount,
-				patterns: patternsExpected,
+				patterns: patternsExpect,
 			},
 			handle(samplesData, channelsCount) {
 				normalizeOffsetWithWindow({
@@ -59,7 +59,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
@@ -81,7 +81,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 					['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0 : 0.1],
 				]),
@@ -104,7 +104,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 					['fill', 0, 1, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
+			patternsExpect: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 0, 1, active ? 0.1 * amplitude : 0],
@@ -131,7 +131,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 					['fill', 99, 100, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
+			patternsExpect: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 99, 100, active ? 0.1 * amplitude : 0],
@@ -158,7 +158,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 					['fill', 50, 51, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude, windowSamples}) => [
+			patternsExpect: ({channelsCount, channels, amplitude, windowSamples}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', 50, 51, active ? 0.1 * amplitude : 0],

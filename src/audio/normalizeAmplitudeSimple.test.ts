@@ -14,7 +14,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 		channelsCount,
 		channels,
 		patternsActual,
-		patternsExpected,
+		patternsExpect,
 		coef,
 		separateChannels,
 	}: {
@@ -22,7 +22,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 		channelsCount: number,
 		channels: number[],
 		patternsActual: SamplesPattern[][],
-		patternsExpected: SamplesPattern[][],
+		patternsExpect: SamplesPattern[][],
 		coef: number,
 		separateChannels: boolean,
 	}) => {
@@ -35,7 +35,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 			expect: {
 				samplesCount,
 				channelsCount,
-				patterns: patternsExpected,
+				patterns: patternsExpect,
 			},
 			handle(samplesData, channelsCount, samplesCount) {
 				normalizeAmplitudeSimple({
@@ -64,7 +64,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
@@ -87,7 +87,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 					['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.6 * sign(amplitude) : 0.1],
 				]),
@@ -112,7 +112,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.3 * sign(amplitude) : 0.1],
 					['fill', position, position + 1, active ? 0.3 * sign(amplitude) : 0],
@@ -138,7 +138,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 					['fill', position, position + 1, active ? [0.1, 0.2, 0.3][channel] * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? [0.3, 0.2, 0.15][channel] * sign(amplitude) : 0.1],
 					['fill', position, position + 1, active ? [0.3, 0.4, 0.45][channel] * sign(amplitude) : 0],
@@ -164,7 +164,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 					['fill', position, position + 1, active ? [0.3, 0.2, 0.1][channel] * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, position, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.15 * sign(amplitude) : 0.1],
 					['fill', position, position + 1, active ? [0.45, 0.3, 0.15][channel] * sign(amplitude) : 0],

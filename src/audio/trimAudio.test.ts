@@ -9,7 +9,7 @@ describe('audio > trimAudio', function () {
 	this.timeout(30000)
 
 	const testVariants = createTestVariants(({
-		samplesCount,
+		samplesCountActual,
 		channelsCount,
 		channels,
 
@@ -23,10 +23,11 @@ describe('audio > trimAudio', function () {
 		minContentDispersionEnd,
 		maxSilenceSamplesEnd,
 
+		samplesCountExpect,
 		patternsActual,
-		patternsExpected,
+		patternsExpect,
 	}: {
-		samplesCount: number,
+		samplesCountActual: number,
 		channelsCount: number,
 		channels: number[],
 		
@@ -39,20 +40,21 @@ describe('audio > trimAudio', function () {
 		minContentSamplesEnd: number,
 		minContentDispersionEnd: number,
 		maxSilenceSamplesEnd: number,
-		
+
+		samplesCountExpect: number,
 		patternsActual: SamplesPattern[][],
-		patternsExpected: SamplesPattern[][],
+		patternsExpect: SamplesPattern[][],
 	}) => {
 		testSamplesWithPatterns({
 			actual: {
-				samplesCount,
+				samplesCount: samplesCountActual,
 				channelsCount,
-				patterns: patternsActual,
+				patterns    : patternsActual,
 			},
 			expect: {
-				samplesCount,
+				samplesCount: samplesCountExpect,
 				channelsCount,
-				patterns: patternsExpected,
+				patterns    : patternsExpect,
 			},
 			handle(samplesData, channelsCount, samplesCount) {
 				trimAudio({
@@ -78,9 +80,9 @@ describe('audio > trimAudio', function () {
 
 	it('silence 0', function () {
 		testVariants({
-			samplesCount : [100],
-			channelsCount: [1, 2, 3],
-			channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
 					: [[0, 2], [1, 2], [0, 1, 2]],
 			
@@ -94,23 +96,20 @@ describe('audio > trimAudio', function () {
 			minContentDispersionEnd: [10],
 			maxSilenceSamplesEnd   : [10],
 			
-			amplitude     : [0, 1, 0.5, -1, -0.25],
-			patternsActual: ({channelsCount, channels, amplitude}) => [
+			amplitude         : [0, 1, 0.5, -1, -0.25],
+			samplesCountExpect: [0],
+			patternsActual    : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
-				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 1, active ? 0 : amplitude],
-				]),
-			],
+			patternsExpect: () => [],
 		})
 	})
 
 	// it('silence 1', function () {
 	// 	testVariants({
-	// 		samplesCount : [100],
+	// 		samplesCountActual : [100],
 	// 		channelsCount: [1, 2, 3],
 	// 		channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 	// 			: channelsCount === 2 ? [[0, 1]]
@@ -121,7 +120,7 @@ describe('audio > trimAudio', function () {
 	// 				['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 	// 			]),
 	// 		],
-	// 		patternsExpected: ({channelsCount, channels, amplitude}) => [
+	// 		patternsExpect: ({channelsCount, channels, amplitude}) => [
 	// 			mapChannels(channelsCount, channels, (channel, active) => [
 	// 				['fill', 0, 100, active ? 0 : 0.1],
 	// 			]),
@@ -131,7 +130,7 @@ describe('audio > trimAudio', function () {
 	//
 	// it('peak', function () {
 	// 	testVariants({
-	// 		samplesCount : [100],
+	// 		samplesCountActual : [100],
 	// 		channelsCount: [1, 2, 3],
 	// 		channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
 	// 			: channelsCount === 2 ? [[0, 1]]
@@ -144,11 +143,11 @@ describe('audio > trimAudio', function () {
 	// 				['fill', position, position + 1, active ? 0.1 * amplitude : 0],
 	// 			]),
 	// 		],
-	// 		patternsExpected: ({channelsCount, channels, position, amplitude, samplesCount}) => [
+	// 		patternsExpect: ({channelsCount, channels, position, amplitude, samplesCountActual}) => [
 	// 			mapChannels(channelsCount, channels, (channel, active) => [
 	// 				['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 	// 				['fill', position, position + 1, active ? 0.1 * amplitude : 0],
-	// 				['fill', 0, 100, active ? -(0.1 + 0.1 * samplesCount) / samplesCount * amplitude : 0],
+	// 				['fill', 0, 100, active ? -(0.1 + 0.1 * samplesCountActual) / samplesCountActual * amplitude : 0],
 	// 			]),
 	// 		],
 	// 	})

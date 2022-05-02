@@ -13,13 +13,13 @@ describe('audio > normalizeOffsetSimple', function () {
 		channelsCount,
 		channels,
 		patternsActual,
-		patternsExpected,
+		patternsExpect,
 	}: {
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
 		patternsActual: SamplesPattern[][],
-		patternsExpected: SamplesPattern[][],
+		patternsExpect: SamplesPattern[][],
 	}) => {
 		testSamplesWithPatterns({
 			actual: {
@@ -30,7 +30,7 @@ describe('audio > normalizeOffsetSimple', function () {
 			expect: {
 				samplesCount,
 				channelsCount,
-				patterns: patternsExpected,
+				patterns: patternsExpect,
 			},
 			handle(samplesData, channelsCount, samplesCount) {
 				normalizeOffsetSimple({
@@ -55,7 +55,7 @@ describe('audio > normalizeOffsetSimple', function () {
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 1, active ? 0 : amplitude],
 				]),
@@ -76,7 +76,7 @@ describe('audio > normalizeOffsetSimple', function () {
 					['fill', 0, 100, active ? 0.2 * amplitude : 0.1],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, amplitude}) => [
+			patternsExpect: ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0: 0.1],
 				]),
@@ -99,7 +99,7 @@ describe('audio > normalizeOffsetSimple', function () {
 					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
 				]),
 			],
-			patternsExpected: ({channelsCount, channels, position, amplitude, samplesCount}) => [
+			patternsExpect: ({channelsCount, channels, position, amplitude, samplesCount}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
 					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
