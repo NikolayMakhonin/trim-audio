@@ -61,13 +61,13 @@ describe('audio > trimAudio', function () {
 					samplesData,
 					channelsCount,
 					channels,
-					start: {
+					start: windowSamplesStart && {
 						windowSamples       : windowSamplesStart,
 						minContentSamples   : minContentSamplesStart,
 						minContentDispersion: minContentDispersionStart,
 						maxSilenceSamples   : maxSilenceSamplesStart,
 					},
-					end: {
+					end: windowSamplesEnd && {
 						windowSamples       : windowSamplesEnd,
 						minContentSamples   : minContentSamplesEnd,
 						minContentDispersion: minContentDispersionEnd,
@@ -91,18 +91,14 @@ describe('audio > trimAudio', function () {
 			windowSamplesStart       : [2, 10, 100],
 			minContentSamplesStart   : [1, 10, 100],
 			minContentDispersionStart: ({amplitude, windowSamplesStart, channels}) => [
-				amplitude * amplitude
-				* (windowSamplesStart * channels.length) / ((windowSamplesStart * channels.length) - 1)
-				+ 1e-8,
+				amplitude * amplitude + 1e-8,
 			],
 			maxSilenceSamplesStart: [10],
 
 			windowSamplesEnd       : [2, 10, 100],
 			minContentSamplesEnd   : [1, 10, 100],
 			minContentDispersionEnd: ({amplitude, windowSamplesEnd, channels}) => [
-				amplitude * amplitude
-				* (windowSamplesEnd * channels.length) / ((windowSamplesEnd * channels.length) - 1)
-				+ 1e-8,
+				amplitude * amplitude + 1e-8,
 			],
 			maxSilenceSamplesEnd: [10],
 			
@@ -129,18 +125,14 @@ describe('audio > trimAudio', function () {
 			windowSamplesStart       : [2, 10, 100],
 			minContentSamplesStart   : [1, 10, 100],
 			minContentDispersionStart: ({amplitude, windowSamplesStart, channels}) => [
-				amplitude * amplitude
-				* (windowSamplesStart * channels.length) / ((windowSamplesStart * channels.length) - 1)
-				- 1e-8,
+				amplitude * amplitude,
 			],
 			maxSilenceSamplesStart: [10],
 
 			windowSamplesEnd       : [2, 10, 100],
 			minContentSamplesEnd   : [1, 10, 100],
 			minContentDispersionEnd: ({amplitude, windowSamplesEnd, channels}) => [
-				amplitude * amplitude
-				* (windowSamplesEnd * channels.length) / ((windowSamplesEnd * channels.length) - 1)
-				- 1e-8,
+				amplitude * amplitude,
 			],
 			maxSilenceSamplesEnd: [10],
 
@@ -158,38 +150,67 @@ describe('audio > trimAudio', function () {
 		})
 	})
 
-	xit('peak', function () {
+	it('start', function () {
 		testVariants({
 			samplesCountActual: [100],
 			channelsCount     : [1, 2, 3],
 			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
 				: channelsCount === 2 ? [[0, 1]]
-					: [[], [0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 
-			windowSamplesStart       : [10],
-			minContentSamplesStart   : [10],
-			minContentDispersionStart: [10],
-			maxSilenceSamplesStart   : [10],
+			windowSamplesStart       : [16, 8, 4, 2],
+			minContentSamplesStart   : [16, 8, 4, 2, 1],
+			minContentDispersionStart: [1],
+			maxSilenceSamplesStart   : [16, 100],
 
-			windowSamplesEnd       : [10],
-			minContentSamplesEnd   : [10],
-			minContentDispersionEnd: [10],
-			maxSilenceSamplesEnd   : [10],
+			windowSamplesEnd       : [null],
+			minContentSamplesEnd   : [null],
+			minContentDispersionEnd: [null],
+			maxSilenceSamplesEnd   : [null],
 
-			position          : [0, 73, 99],
-			amplitude         : [0, 1, 0.5, -1, -0.25],
-			samplesCountExpect: [0],
-			patternsActual    : ({channelsCount, channels, position, amplitude}) => [
+			position          : [0, 1, 50, 53, 83, 84],
+			samplesCountExpect: ({samplesCountActual, position}) => [samplesCountActual - position],
+			patternsActual    : ({channelsCount, channels, position}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
-					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
+					['fill-noise', position, position + 16, active ? 1 : 0],
 				]),
 			],
-			patternsExpect: ({channelsCount, channels, position, amplitude, samplesCountActual}) => [
+			patternsExpect: ({channelsCount, channels}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill', 0, 100, active ? 0.1 * amplitude : 0.1],
-					['fill', position, position + 1, active ? 0.1 * amplitude : 0],
-					['fill', 0, 100, active ? -(0.1 + 0.1 * samplesCountActual) / samplesCountActual * amplitude : 0],
+					['fill-noise', 0, 16, active ? 1 : 0],
+				]),
+			],
+		})
+	})
+
+	it('end', function () {
+		testVariants({
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+
+			windowSamplesStart       : [null],
+			minContentSamplesStart   : [null],
+			minContentDispersionStart: [null],
+			maxSilenceSamplesStart   : [null],
+
+			windowSamplesEnd       : [16, 8, 4, 2],
+			minContentSamplesEnd   : [16, 8, 4, 2, 1],
+			minContentDispersionEnd: [1],
+			maxSilenceSamplesEnd   : [16, 100],
+
+			position          : [0, 1, 50, 53, 83, 84],
+			samplesCountExpect: ({position}) => [position + 16],
+			patternsActual    : ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', position, position + 16, active ? 1 : 0],
+				]),
+			],
+			patternsExpect: ({channelsCount, channels, position}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', position, position + 16, active ? 1 : 0],
 				]),
 			],
 		})

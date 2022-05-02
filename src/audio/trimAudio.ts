@@ -1,4 +1,4 @@
-import {generateIndexArray} from './helpers'
+import {EPSILON, generateIndexArray} from './helpers'
 
 // max dispersion of normalized audio = 1
 // max decibel of normalized audio = 0
@@ -66,14 +66,14 @@ export function searchContent({
       const count = windowSamples * channelsLength
       const avg = sum / count
       const sqrAvg = sumSqr / count
-      const dispersion = (sqrAvg - avg * avg) * count / (count - 1)
+      const dispersion = (sqrAvg - avg * avg) // * count / (count - 1)
 
-      if (dispersion > minContentDispersion) {
+      if (dispersion >= minContentDispersion - EPSILON) {
         if (contentStartEnd === 0) {
           contentStartIndex = i + 1 - windowSamples
         }
         contentStartEnd = i + 1
-        if (i + 1 - contentStartIndex > minContentSamples) {
+        if (i + 1 - contentStartIndex >= minContentSamples) {
           return backward
             ? samplesCount - 1 - contentStartIndex
             : contentStartIndex
@@ -133,12 +133,14 @@ export function trimAudio({
   const trimEndExclusive = !end ? samplesCount : searchContent({
     samplesData,
     channelsCount,
-    samplesCount        : Math.min(samplesCount, samplesCount - trimStart + start.windowSamples),
+    samplesCount: start
+      ? Math.min(samplesCount, samplesCount - trimStart + start.windowSamples)
+      : samplesCount,
     channels,
-    windowSamples       : start.windowSamples,
+    windowSamples       : end.windowSamples,
     backward            : true,
     minContentSamples   : end.minContentSamples,
-    minContentDispersion: start.minContentDispersion,
+    minContentDispersion: end.minContentDispersion,
     maxSilenceSamples   : end.maxSilenceSamples,
   }) + 1
 
@@ -146,7 +148,7 @@ export function trimAudio({
     ? new Float32Array(0)
     : new Float32Array(
       samplesData.buffer,
-      trimStart * channelsCount,
-      trimEndExclusive * channelsCount,
+      trimStart * channelsCount * 4,
+      (trimEndExclusive - trimStart) * channelsCount,
     )
 }

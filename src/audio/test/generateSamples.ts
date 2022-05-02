@@ -80,7 +80,7 @@ export function generateFillNoiseSamples({
   }
   for (let i = start; i < endExclusive; i++) {
     const value = (i - start) * (amplitudeEnd - amplitudeStart) / (endExclusive - start) + amplitudeStart
-    samplesData[i * channelsCount + channel] += (i % 2 ? 1 : -1) * value
+    samplesData[i * channelsCount + channel] += ((i - start) % 2 ? 1 : -1) * value
   }
 }
 
