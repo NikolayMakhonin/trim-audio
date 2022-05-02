@@ -82,7 +82,7 @@ export function searchContent({
   }
 
   if (contentStartEnd === 0) {
-    return backward ? samplesCount - 1 : 0
+    return backward ? -1 : samplesCount
   }
 
   return backward

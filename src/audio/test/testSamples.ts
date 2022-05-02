@@ -22,7 +22,11 @@ export function testSamples({
       samplesData: Float32Array, channelsCount: number, samplesCount: number,
     ) => void,
   },
-  handle: (samplesData: Float32Array, channelsCount: number, samplesCount: number) => void,
+  handle: (
+    samplesData: Float32Array,
+    channelsCount: number,
+    samplesCount: number,
+  ) => void | Float32Array,
   maxDiff?: number,
 }) {
   const _actual = {
@@ -34,7 +38,11 @@ export function testSamples({
     channelsCount: expect.channelsCount,
   }
 
-  handle(_actual.samplesData, _actual.channelsCount, actual.samplesCount)
+  _actual.samplesData = handle(
+    _actual.samplesData,
+    _actual.channelsCount,
+    actual.samplesCount,
+  ) || _actual.samplesData
 
   checkSamples({
     actual: _actual,
@@ -85,9 +93,9 @@ export function testSamplesWithPatterns({
         channelsCount,
       ) {
         generateSamples({
-          samplesData: samplesData,
+          samplesData,
           channelsCount,
-          patterns   : expect.patterns,
+          patterns: expect.patterns,
         })
       },
     },

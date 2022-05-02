@@ -77,8 +77,10 @@ export function createTestVariants<TArgs extends object>(
       return false
     }
 
+    let iteration = 0
     while (nextVariant()) {
       try {
+        iteration++
         test(variantArgs)
       } catch (err) {
         console.error(JSON.stringify(variantArgs, null, 2))
@@ -95,5 +97,7 @@ export function createTestVariants<TArgs extends object>(
         throw err
       }
     }
+
+    console.log('iterations: ' + iteration)
   }
 }

@@ -58,6 +58,32 @@ export function generateFillSamples({
   }
 }
 
+export function generateFillNoiseSamples({
+  samplesData,
+  channelsCount,
+  channel,
+  start,
+  endExclusive,
+  amplitudeStart,
+  amplitudeEnd,
+}: {
+  samplesData: Float32Array,
+  channelsCount: number,
+  channel: number,
+  start: number,
+  endExclusive: number,
+  amplitudeStart: number,
+  amplitudeEnd?: number,
+}) {
+  if (amplitudeEnd == null) {
+    amplitudeEnd = amplitudeStart
+  }
+  for (let i = start; i < endExclusive; i++) {
+    const value = (i - start) * (amplitudeEnd - amplitudeStart) / (endExclusive - start) + amplitudeStart
+    samplesData[i * channelsCount + channel] += (i % 2 ? 1 : -1) * value
+  }
+}
+
 export function generateTriangleSamples({
   samplesData,
   channelsCount,
@@ -103,7 +129,7 @@ export function generateTrianglesSamples({
   }
 }
 
-export type SamplesType = 'fill' | 'triangle'
+export type SamplesType = 'fill' | 'fill-noise' | 'triangle'
 export type SamplesPattern = [
   type: SamplesType,
   start: number,
@@ -128,6 +154,17 @@ export function generateSamples({
       switch (type) {
         case 'fill':
           generateFillSamples({
+            samplesData,
+            channelsCount,
+            channel,
+            start,
+            endExclusive,
+            amplitudeStart,
+            amplitudeEnd,
+          })
+          break
+        case 'fill-noise':
+          generateFillNoiseSamples({
             samplesData,
             channelsCount,
             channel,
