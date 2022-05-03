@@ -1,22 +1,22 @@
-// /* eslint-disable no-shadow */
-// import path from 'path'
-// import {trimAudioFile, trimAudioFiles, trimAudioFilesFromDir} from '../../../main/node/trim'
-//
-// describe('node > trim', function () {
-// 	this.timeout(60000000)
-//
-// 	it('base', async function () {
-// 		await trimAudioFile({
-// 			inputFilePath : path.join(__dirname, 'assets/test.ogg'),
-// 			outputFilePath: './tmp/test/base.mp3',
-// 		})
-// 	})
-//
-// 	it('bulk', async function () {
-// 		await trimAudioFilesFromDir({
-// 			inputDir               : 'l:/Work/_GIT/GitHub/NodeJs/apps/counter-sapper/docs/materials/speech/ogg',
-// 			inputFilesRelativeGlobs: ['**/*.ogg'],
-// 			outputDir              : 'l:/Work/_GIT/GitHub/NodeJs/apps/counter-sapper/static/client/speech/mp3',
-// 		})
-// 	})
-// })
+/* eslint-disable no-shadow */
+import {trimAudioFile, trimAudioFilesFromDir} from './trim-files'
+import {getAssetPath} from './loadAsset'
+
+xdescribe('audio > test > trim-files', function () {
+	this.timeout(60000000)
+
+	it('file', async function () {
+		await trimAudioFile({
+			inputFilePath : getAssetPath('word.mp3'),
+			outputFilePath: 'trim/word.mp3',
+		})
+	})
+
+	it('files', async function () {
+		await trimAudioFilesFromDir({
+			inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech/en',
+			inputFilesRelativeGlobs: ['**/*.mp3'],
+			outputDir              : 'E:/Temp/trim/speech',
+		})
+	})
+})

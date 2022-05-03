@@ -1,5 +1,5 @@
 import fse from 'fs-extra'
-import {globby} from 'globby'
+import globby from 'globby'
 import path from 'path'
 import {getAssetData} from './loadAsset'
 import {AudioSamples} from '../contracts'
@@ -10,8 +10,8 @@ import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
 import {normalizeAmplitudeWithWindow} from '../normalizeAmplitudeWithWindow'
 
-const SILENCE_DECIBEL_START_DEFAULT = -22 // use -30 for 'ф..'
-const SILENCE_DECIBEL_END_DEFAULT = -40
+const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
+const SILENCE_DECIBEL_END_DEFAULT = -40.5
 
 async function readAudioFile(filePath: string): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
