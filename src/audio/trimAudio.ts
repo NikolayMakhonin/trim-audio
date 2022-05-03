@@ -124,17 +124,19 @@ export function trimAudio({
     minContentSamples: number,
     minContentDispersion: number,
     maxSilenceSamples: number,
+    space: number,
   },
   end?: {
     windowSamples: number,
     minContentSamples: number,
     minContentDispersion: number,
     maxSilenceSamples: number,
+    space: number,
   },
 }) {
   const samplesCount = Math.floor(samplesData.length / channelsCount)
 
-  const trimStart = !start ? 0 : searchContent({
+  let trimStart = !start ? 0 : searchContent({
     samplesData,
     channelsCount,
     samplesCount,
@@ -146,7 +148,7 @@ export function trimAudio({
     maxSilenceSamples   : start.maxSilenceSamples,
   })
 
-  const trimEndExclusive = !end ? samplesCount : samplesCount - 1 - searchContent({
+  let trimEndExclusive = !end ? samplesCount : samplesCount - 1 - searchContent({
     samplesData,
     channelsCount,
     samplesCount,
@@ -160,9 +162,18 @@ export function trimAudio({
       && Math.min(samplesCount, samplesCount - trimStart),
   }) + 1
 
-  return trimStart >= trimEndExclusive
-    ? new Float32Array(0)
-    : new Float32Array(
+  if (trimStart >= trimEndExclusive) {
+    return new Float32Array(0)
+  }
+
+  if (start?.space) {
+    trimStart = Math.max(0, trimStart - start.space)
+  }
+  if (end?.space) {
+    trimEndExclusive = Math.min(samplesCount, trimEndExclusive + end.space)
+  }
+
+  return new Float32Array(
       samplesData.buffer,
       trimStart * channelsCount * 4,
       (trimEndExclusive - trimStart) * channelsCount,

@@ -23,6 +23,9 @@ describe('audio > trimAudio', function () {
 		minContentDispersionEnd,
 		maxSilenceSamplesEnd,
 
+		spaceStart,
+		spaceEnd,
+
 		samplesCountExpect,
 		patternsActual,
 		patternsExpect,
@@ -40,6 +43,9 @@ describe('audio > trimAudio', function () {
 		minContentSamplesEnd: number,
 		minContentDispersionEnd: number,
 		maxSilenceSamplesEnd: number,
+
+		spaceStart: number,
+		spaceEnd: number,
 
 		samplesCountExpect: number,
 		patternsActual: SamplesPattern[][],
@@ -67,12 +73,14 @@ describe('audio > trimAudio', function () {
 						minContentSamples   : minContentSamplesStart,
 						minContentDispersion: minContentDispersionStart,
 						maxSilenceSamples   : maxSilenceSamplesStart,
+						space               : spaceStart,
 					},
 					end: windowSamplesEnd && {
 						windowSamples       : windowSamplesEnd,
 						minContentSamples   : minContentSamplesEnd,
 						minContentDispersion: minContentDispersionEnd,
 						maxSilenceSamples   : maxSilenceSamplesEnd,
+						space               : spaceEnd,
 					},
 				})
 			},
@@ -102,6 +110,9 @@ describe('audio > trimAudio', function () {
 				amplitude * amplitude + 1e-8,
 			],
 			maxSilenceSamplesEnd: [10],
+
+			spaceStart: [0, 100],
+			spaceEnd  : [0, 100],
 			
 			samplesCountExpect: [0],
 			patternsActual    : ({channelsCount, channels, amplitude}) => [
@@ -137,6 +148,9 @@ describe('audio > trimAudio', function () {
 			],
 			maxSilenceSamplesEnd: [10],
 
+			spaceStart: [0, 100],
+			spaceEnd  : [0, 100],
+
 			samplesCountExpect: [100],
 			patternsActual    : ({channelsCount, channels, amplitude}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
@@ -169,16 +183,21 @@ describe('audio > trimAudio', function () {
 			minContentDispersionEnd: [null],
 			maxSilenceSamplesEnd   : [null],
 
+			spaceStart: [0, 1, 10, 100],
+			spaceEnd  : [0, 100],
+
 			position          : [0, 1, 50, 53, 83, 84],
-			samplesCountExpect: ({samplesCountActual, position}) => [samplesCountActual - position],
-			patternsActual    : ({channelsCount, channels, position}) => [
+			samplesCountExpect: ({samplesCountActual, position, spaceStart}) => [
+				Math.min(samplesCountActual, samplesCountActual - position + spaceStart),
+			],
+			patternsActual: ({channelsCount, channels, position}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill-noise', position, position + 16, active ? 1 : 0],
 				]),
 			],
-			patternsExpect: ({channelsCount, channels}) => [
+			patternsExpect: ({channelsCount, channels, position, spaceStart}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
-					['fill-noise', 0, 16, active ? 1 : 0],
+					['fill-noise', Math.min(position, spaceStart), Math.min(position, spaceStart) + 16, active ? 1 : 0],
 				]),
 			],
 		})
@@ -202,9 +221,14 @@ describe('audio > trimAudio', function () {
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [16, 100],
 
+			spaceStart: [0, 100],
+			spaceEnd  : [0, 1, 10, 100],
+
 			position          : [0, 1, 50, 53, 83, 84],
-			samplesCountExpect: ({position}) => [position + 16],
-			patternsActual    : ({channelsCount, channels, position}) => [
+			samplesCountExpect: ({samplesCountActual, position, spaceEnd}) => [
+				Math.min(samplesCountActual, position + 16 + spaceEnd),
+			],
+			patternsActual: ({channelsCount, channels, position}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
 					['fill-noise', position, position + 16, active ? 1 : 0],
 				]),
@@ -234,6 +258,9 @@ describe('audio > trimAudio', function () {
 			minContentSamplesEnd   : [16, 8, 2, 1],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [16],
+
+			spaceStart: [0],
+			spaceEnd  : [0],
 
 			position          : [0, 1, 50, 53, 83, 84],
 			samplesCountExpect: [16],
@@ -267,6 +294,9 @@ describe('audio > trimAudio', function () {
 			minContentSamplesEnd   : [37],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [13],
+
+			spaceStart: [0],
+			spaceEnd  : [0],
 
 			samplesCountExpect: [77],
 			patternsActual    : ({channelsCount, channels}) => [
@@ -306,6 +336,9 @@ describe('audio > trimAudio', function () {
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [9],
 
+			spaceStart: [0],
+			spaceEnd  : [0],
+
 			samplesCountExpect: [0],
 			patternsActual    : ({channelsCount, channels}) => [
 				mapChannels(channelsCount, channels, (channel, active) => [
@@ -334,6 +367,9 @@ describe('audio > trimAudio', function () {
 			minContentSamplesEnd   : [11],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [3],
+
+			spaceStart: [0],
+			spaceEnd  : [0],
 
 			samplesCountExpect: [11],
 			patternsActual    : ({channelsCount, channels}) => [
