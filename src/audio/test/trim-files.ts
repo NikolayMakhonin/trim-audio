@@ -10,8 +10,8 @@ import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
 import {normalizeAmplitudeWithWindow} from '../normalizeAmplitudeWithWindow'
 
-const SILENCE_LEVEL_START_DEFAULT = -1.1 // use -1.5 for 'ф..'
-const SILENCE_LEVEL_END_DEFAULT = -2
+const SILENCE_DECIBEL_START_DEFAULT = -22 // use -30 for 'ф..'
+const SILENCE_DECIBEL_END_DEFAULT = -40
 
 async function readAudioFile(filePath: string): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
@@ -42,19 +42,19 @@ async function saveToMp3File(filePath, samples: AudioSamples) {
 export async function trimAudioFile({
   inputFilePath,
   outputFilePath,
-  silenceLevelStart,
-  silenceLevelEnd,
+  silenceDecibelStart,
+  silenceDecibelEnd,
 }: {
   inputFilePath: string,
   outputFilePath: string,
-  silenceLevelStart?: number,
-  silenceLevelEnd?: number,
+  silenceDecibelStart?: number,
+  silenceDecibelEnd?: number,
 }) {
-  if (silenceLevelStart == null) {
-    silenceLevelStart = SILENCE_LEVEL_START_DEFAULT
+  if (silenceDecibelStart == null) {
+    silenceDecibelStart = SILENCE_DECIBEL_START_DEFAULT
   }
-  if (silenceLevelEnd == null) {
-    silenceLevelEnd = SILENCE_LEVEL_END_DEFAULT
+  if (silenceDecibelEnd == null) {
+    silenceDecibelEnd = SILENCE_DECIBEL_END_DEFAULT
   }
 
   inputFilePath = path.resolve(inputFilePath)
@@ -90,13 +90,15 @@ export async function trimAudioFile({
       windowSamples       : Math.round(samples.sampleRate / 50), // 50 Hz
       maxSilenceSamples   : Math.round(samples.sampleRate * 0.25), // 250 ms
       minContentSamples   : Math.round(samples.sampleRate * 0.09), // 90 ms
-      minContentDispersion: decibelToDispersion(silenceLevelStart),
+      minContentDispersion: decibelToDispersion(silenceDecibelStart),
+      space               : Math.round(samples.sampleRate / 15), // 15 Hz
     },
     end: {
       windowSamples       : Math.round(samples.sampleRate / 50), // 50 Hz
       maxSilenceSamples   : Math.round(samples.sampleRate * 0.25), // 250 ms
       minContentSamples   : Math.round(samples.sampleRate * 0.09), // 90 ms
-      minContentDispersion: decibelToDispersion(silenceLevelEnd),
+      minContentDispersion: decibelToDispersion(silenceDecibelEnd),
+      space               : Math.round(samples.sampleRate / 15), // 15 Hz
     },
   })
   
@@ -114,13 +116,13 @@ export async function trimAudioFile({
 export async function trimAudioFiles({
   inputFilesGlobs,
   getOutputFilePath,
-  silenceLevelStart,
-  silenceLevelEnd,
+  silenceDecibelStart,
+  silenceDecibelEnd,
 }: {
   inputFilesGlobs: string[],
   getOutputFilePath: (inputFilePath: string) => string,
-  silenceLevelStart?: number,
-  silenceLevelEnd?: number,
+  silenceDecibelStart?: number,
+  silenceDecibelEnd?: number,
 }) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
 
@@ -135,8 +137,8 @@ export async function trimAudioFiles({
       await trimAudioFile({
         inputFilePath,
         outputFilePath,
-        silenceLevelStart,
-        silenceLevelEnd,
+        silenceDecibelStart,
+        silenceDecibelEnd,
       })
       console.log('OK: ' + outputFilePath)
     } catch (err) {
@@ -151,14 +153,14 @@ export function trimAudioFilesFromDir({
   inputDir,
   inputFilesRelativeGlobs,
   outputDir,
-  silenceLevelStart,
-  silenceLevelEnd,
+  silenceDecibelStart,
+  silenceDecibelEnd,
 }: {
   inputDir: string,
   inputFilesRelativeGlobs: string[],
   outputDir: string,
-  silenceLevelStart?: number,
-  silenceLevelEnd?: number,
+  silenceDecibelStart?: number,
+  silenceDecibelEnd?: number,
 }) {
   return trimAudioFiles({
     inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
@@ -166,7 +168,7 @@ export function trimAudioFilesFromDir({
       return path.resolve(outputDir, path.relative(inputDir, filePath))
         .replace(/\.\w+$/, '') + '.mp3'
     },
-    silenceLevelStart,
-    silenceLevelEnd,
+    silenceDecibelStart,
+    silenceDecibelEnd,
   })
 }
