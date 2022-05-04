@@ -9,6 +9,7 @@ import {normalizeAmplitudeSimple} from '../normalizeAmplitudeSimple'
 import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
 import {normalizeAmplitudeWithWindow} from '../normalizeAmplitudeWithWindow'
+import {smoothAudio} from '../smoothAudio'
 
 // const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
 // const SILENCE_DECIBEL_END_DEFAULT = -40.5
@@ -103,12 +104,19 @@ export async function trimAudioFile({
     },
   })
   
-  normalizeAmplitudeWithWindow({
-    samplesData     : samples.data,
-    channelsCount   : samples.channels,
-    coef            : 0.9,
-    windowSamples   : Math.round(samples.sampleRate * 0.5),
-    separateChannels: true,
+  // normalizeAmplitudeWithWindow({
+  //   samplesData     : samples.data,
+  //   channelsCount   : samples.channels,
+  //   coef            : 0.9,
+  //   windowSamples   : Math.round(samples.sampleRate * 0.5),
+  //   separateChannels: true,
+  // })
+
+  smoothAudio({
+    samplesData  : samples.data,
+    channelsCount: samples.channels,
+    startSamples : samples.sampleRate * 50 / 1000,
+    endSamples   : samples.sampleRate * 50 / 1000,
   })
 
   await saveToMp3File(outputFilePath, samples)
