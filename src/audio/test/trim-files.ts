@@ -16,13 +16,13 @@ import {normalizeAmplitudeWithWindow} from '../normalizeAmplitudeWithWindow'
 const START_WINDOW_DEFAULT = 50
 const START_DECIBEL_DEFAULT = -31
 const START_SPACE_DEFAULT = 10
-const START_MAX_SILENCE_DEFAULT = 250
+const START_MAX_SILENCE_DEFAULT = 400
 const START_MIN_CONTENT_DEFAULT = 500
 
 const END_WINDOW_DEFAULT = 50
 const END_DECIBEL_DEFAULT = -31
-const END_SPACE_DEFAULT = 50
-const END_MAX_SILENCE_DEFAULT = 250
+const END_SPACE_DEFAULT = 100
+const END_MAX_SILENCE_DEFAULT = 400
 const END_MIN_CONTENT_DEFAULT = 500
 
 async function readAudioFile(filePath: string): Promise<AudioSamples> {
@@ -107,7 +107,7 @@ export async function trimAudioFile({
     samplesData     : samples.data,
     channelsCount   : samples.channels,
     coef            : 0.9,
-    windowSamples   : Math.round(samples.sampleRate / 15), // 15 Hz
+    windowSamples   : Math.round(samples.sampleRate * 0.5),
     separateChannels: true,
   })
 
