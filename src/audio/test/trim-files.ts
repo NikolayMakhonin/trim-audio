@@ -24,7 +24,7 @@ const END_WINDOW_DEFAULT = 50
 const END_DECIBEL_DEFAULT = -31
 const END_SPACE_DEFAULT = 100
 const END_MAX_SILENCE_DEFAULT = 400
-const END_MIN_CONTENT_DEFAULT = 500
+const END_MIN_CONTENT_DEFAULT = 200
 
 async function readAudioFile(filePath: string): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
