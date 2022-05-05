@@ -56,6 +56,7 @@ export function searchContent({
 
   let sum = 0
   let sumSqr = 0
+  let totalSilenceLength = 0
 
   for (let i = 0; i < endExclusive; i++) {
     for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
@@ -93,11 +94,14 @@ export function searchContent({
       if (dispersion >= minContentDispersion - EPSILON) {
         if (contentStartEnd === 0) {
           contentStartIndex = i + 1 - windowSamples
+          totalSilenceLength = 0
         }
         contentStartEnd = i + 1
-        if (contentStartEnd - contentStartIndex >= minContentSamples) {
+        if (contentStartEnd - contentStartIndex - totalSilenceLength >= minContentSamples) {
           return contentStartIndex
         }
+      } else if (contentStartEnd - contentStartIndex > windowSamples * 2) {
+        totalSilenceLength++
       }
     }
   }

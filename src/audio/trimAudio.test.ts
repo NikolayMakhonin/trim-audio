@@ -286,12 +286,12 @@ describe('audio > trimAudio', function () {
 					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 
 			windowSamplesStart       : [8],
-			minContentSamplesStart   : [21],
+			minContentSamplesStart   : [16],
 			minContentDispersionStart: [1],
 			maxSilenceSamplesStart   : [5],
 
 			windowSamplesEnd       : [12],
-			minContentSamplesEnd   : [37],
+			minContentSamplesEnd   : [24],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [13],
 
@@ -327,12 +327,12 @@ describe('audio > trimAudio', function () {
 					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 
 			windowSamplesStart       : [10],
-			minContentSamplesStart   : [30],
+			minContentSamplesStart   : [20],
 			minContentDispersionStart: [1],
 			maxSilenceSamplesStart   : [10],
 
 			windowSamplesEnd       : [10],
-			minContentSamplesEnd   : [30],
+			minContentSamplesEnd   : [20],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [9],
 
@@ -359,12 +359,12 @@ describe('audio > trimAudio', function () {
 					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
 
 			windowSamplesStart       : [4],
-			minContentSamplesStart   : [11],
+			minContentSamplesStart   : [8],
 			minContentDispersionStart: [1],
 			maxSilenceSamplesStart   : [3],
 
 			windowSamplesEnd       : [4],
-			minContentSamplesEnd   : [11],
+			minContentSamplesEnd   : [8],
 			minContentDispersionEnd: [1],
 			maxSilenceSamplesEnd   : [3],
 

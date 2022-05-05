@@ -21,7 +21,7 @@ describe('audio > test > trim-files', function () {
 		})
 	})
 
-	xit('files', async function () {
+	it('files', async function () {
 		await trimAudioFilesFromDir({
 			inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech',
 			inputFilesRelativeGlobs: ['**/*.mp3'],

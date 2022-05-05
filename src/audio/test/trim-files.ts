@@ -38,6 +38,9 @@ async function readAudioFile(filePath: string): Promise<AudioSamples> {
 }
 
 async function saveToMp3File(filePath, samples: AudioSamples) {
+  if (samples.data.length < 256) {
+    throw new Error('samples.data.length === ' + samples.data.length)
+  }
   const data: Uint8Array = await ffmpegEncode(samples, {
     outputFormat: 'mp3', // same as file extension
     // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
@@ -131,7 +134,8 @@ export async function trimAudioFiles({
 }) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
 
-  await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
+  // await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
+  for (const inputFilePath of inputFilesPaths) {
     const outputFilePath = getOutputFilePath(inputFilePath)
 
     if (fse.existsSync(outputFilePath)) {
@@ -146,8 +150,10 @@ export async function trimAudioFiles({
       console.log('OK: ' + outputFilePath)
     } catch (err) {
       console.log('ERROR: ' + inputFilePath + '\r\n' + (err.stack || err.message || err))
+      throw err
     }
-  }))
+  }
+  // }))
 
   console.log('Completed!')
 }
