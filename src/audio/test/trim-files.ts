@@ -16,21 +16,21 @@ import {smoothAudio} from '../smoothAudio'
 
 const START_WINDOW_DEFAULT = 50
 const START_DECIBEL_DEFAULT = -31
-const START_SPACE_DEFAULT = 10
-const START_MAX_SILENCE_DEFAULT = 400
-const START_MIN_CONTENT_DEFAULT = 500
+const START_SPACE_DEFAULT = 20
+const START_MAX_SILENCE_DEFAULT = 350
+const START_MIN_CONTENT_DEFAULT = 200
 
 const END_WINDOW_DEFAULT = 50
 const END_DECIBEL_DEFAULT = -31
 const END_SPACE_DEFAULT = 100
-const END_MAX_SILENCE_DEFAULT = 400
+const END_MAX_SILENCE_DEFAULT = 350
 const END_MIN_CONTENT_DEFAULT = 200
 
 async function readAudioFile(filePath: string): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
 
   const samples: AudioSamples = await ffmpegDecode(data, {
-    channels  : 2,
+    channels  : 1,
     sampleRate: 44100,
   })
 
@@ -45,9 +45,8 @@ async function saveToMp3File(filePath, samples: AudioSamples) {
     outputFormat: 'mp3', // same as file extension
     // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
     params      : ffmpegEncodeMp3Params({
-      bitrate    : 320,
-      mode       : 'cbr',
-      vbrQuality : 0,
+      mode       : 'vbr',
+      vbrQuality : 8,
       jointStereo: true,
     }),
   })
@@ -106,19 +105,27 @@ export async function trimAudioFile({
       space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
     },
   })
-  
+
+  normalizeAmplitudeSimple({
+    samplesData     : samples.data,
+    channelsCount   : samples.channels,
+    coef            : 0.9,
+    separateChannels: true,
+  })
+
   // normalizeAmplitudeWithWindow({
   //   samplesData     : samples.data,
   //   channelsCount   : samples.channels,
   //   coef            : 0.9,
-  //   windowSamples   : Math.round(samples.sampleRate * 0.5),
+  //   maxMult         : 3,
+  //   windowSamples   : Math.round(samples.sampleRate * 0.1),
   //   separateChannels: true,
   // })
 
   smoothAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
-    startSamples : samples.sampleRate * 50 / 1000,
+    startSamples : samples.sampleRate * 20 / 1000,
     endSamples   : samples.sampleRate * 50 / 1000,
   })
 
@@ -133,13 +140,14 @@ export async function trimAudioFiles({
   getOutputFilePath: (inputFilePath: string) => string,
 }) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
+  inputFilesPaths.sort()
 
   // await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
   for (const inputFilePath of inputFilesPaths) {
     const outputFilePath = getOutputFilePath(inputFilePath)
 
     if (fse.existsSync(outputFilePath)) {
-      return
+      continue
     }
 
     try {

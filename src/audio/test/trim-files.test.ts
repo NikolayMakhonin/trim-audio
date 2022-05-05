@@ -8,24 +8,28 @@ describe('audio > test > trim-files', function () {
 
 	it('file', async function () {
 		await trimAudioFile({
-			inputFilePath : getAssetPath('word.mp3'),
-			outputFilePath: getTempFilePath('word.mp3'),
+			inputFilePath : getAssetPath('vi_ten.mp3'),
+			outputFilePath: getTempFilePath('vi_ten.mp3'),
 		})
-		await trimAudioFile({
-			inputFilePath : getAssetPath('фиксируем.ogg'),
-			outputFilePath: getTempFilePath('фиксируем.mp3'),
-		})
-		await trimAudioFile({
-			inputFilePath : getAssetPath('преданность_самоотдача.ogg'),
-			outputFilePath: getTempFilePath('преданность_самоотдача.mp3'),
-		})
+		// await trimAudioFile({
+		// 	inputFilePath : getAssetPath('word.mp3'),
+		// 	outputFilePath: getTempFilePath('word.mp3'),
+		// })
+		// await trimAudioFile({
+		// 	inputFilePath : getAssetPath('фиксируем.ogg'),
+		// 	outputFilePath: getTempFilePath('фиксируем.mp3'),
+		// })
+		// await trimAudioFile({
+		// 	inputFilePath : getAssetPath('преданность_самоотдача.ogg'),
+		// 	outputFilePath: getTempFilePath('преданность_самоотдача.mp3'),
+		// })
 	})
 
 	xit('files', async function () {
 		await trimAudioFilesFromDir({
-			inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech',
+			inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech/ja',
 			inputFilesRelativeGlobs: ['**/*.mp3'],
-			outputDir              : 'E:/Temp/trim/speech',
+			outputDir              : 'E:/Temp/trim/speech/ja',
 		})
 	})
 })

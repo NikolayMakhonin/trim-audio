@@ -106,6 +106,7 @@ export function normalizeAmplitudeWithWindow({
   channels,
   separateChannels,
   coef,
+  maxMult,
   windowSamples,
 }: {
   samplesData: Float32Array,
@@ -113,6 +114,7 @@ export function normalizeAmplitudeWithWindow({
   channels?: number[],
   separateChannels?: boolean,
   coef: number,
+  maxMult?: number,
   windowSamples: number,
 }) {
   if (channels == null) {
@@ -131,6 +133,7 @@ export function normalizeAmplitudeWithWindow({
         channelsCount,
         channels: [channels[nChannel]],
         coef,
+        maxMult,
         windowSamples,
       })
     }
@@ -142,6 +145,7 @@ export function normalizeAmplitudeWithWindow({
     channelsCount,
     channels,
     coef,
+    maxMult,
     windowSamples,
   })
 }

@@ -329,12 +329,44 @@ describe('audio > trimAudio', function () {
 			windowSamplesStart       : [10],
 			minContentSamplesStart   : [20],
 			minContentDispersionStart: [1],
+			maxSilenceSamplesStart   : [9],
+
+			windowSamplesEnd       : [10],
+			minContentSamplesEnd   : [20],
+			minContentDispersionEnd: [1],
+			maxSilenceSamplesEnd   : [10],
+
+			spaceStart: [0],
+			spaceEnd  : [0],
+
+			samplesCountExpect: [0],
+			patternsActual    : ({channelsCount, channels}) => [
+				mapChannels(channelsCount, channels, (channel, active) => [
+					['fill-noise', 30, 40, active ? 1 : 0],
+					['fill-noise', 50, 60, active ? 1 : 0],
+				]),
+			],
+			patternsExpect: [null],
+		})
+	})
+
+	it('start/end with space silence 2', function () {
+		testVariants({
+			samplesCountActual: [100],
+			channelsCount     : [1, 2, 3],
+			channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
+				: channelsCount === 2 ? [[0, 1]]
+					: [[0], [1], [2], [0, 2], [1, 2], [0, 1, 2]],
+
+			windowSamplesStart       : [10],
+			minContentSamplesStart   : [21],
+			minContentDispersionStart: [1],
 			maxSilenceSamplesStart   : [10],
 
 			windowSamplesEnd       : [10],
 			minContentSamplesEnd   : [20],
 			minContentDispersionEnd: [1],
-			maxSilenceSamplesEnd   : [9],
+			maxSilenceSamplesEnd   : [10],
 
 			spaceStart: [0],
 			spaceEnd  : [0],
