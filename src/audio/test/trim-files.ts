@@ -80,10 +80,12 @@ export async function trimAudioFile({
     windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
   })
 
+  const normalizeCoef = 0.95
+
   normalizeAmplitudeSimple({
     samplesData     : samples.data,
     channelsCount   : samples.channels,
-    coef            : 1,
+    coef            : normalizeCoef,
     separateChannels: true,
   })
 
@@ -94,24 +96,24 @@ export async function trimAudioFile({
       windowSamples       : Math.round(samples.sampleRate * START_WINDOW_DEFAULT / 1000),
       maxSilenceSamples   : Math.round(samples.sampleRate * START_MAX_SILENCE_DEFAULT / 1000),
       minContentSamples   : Math.round(samples.sampleRate * START_MIN_CONTENT_DEFAULT / 1000),
-      minContentDispersion: decibelToDispersion(START_DECIBEL_DEFAULT),
+      minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(START_DECIBEL_DEFAULT),
       space               : Math.round(samples.sampleRate * START_SPACE_DEFAULT / 1000),
     },
     end: {
       windowSamples       : Math.round(samples.sampleRate * END_WINDOW_DEFAULT / 1000),
       maxSilenceSamples   : Math.round(samples.sampleRate * END_MAX_SILENCE_DEFAULT / 1000),
       minContentSamples   : Math.round(samples.sampleRate * END_MIN_CONTENT_DEFAULT / 1000),
-      minContentDispersion: decibelToDispersion(END_DECIBEL_DEFAULT),
+      minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(END_DECIBEL_DEFAULT),
       space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
     },
   })
 
-  normalizeAmplitudeSimple({
-    samplesData     : samples.data,
-    channelsCount   : samples.channels,
-    coef            : 0.9,
-    separateChannels: true,
-  })
+  // normalizeAmplitudeSimple({
+  //   samplesData     : samples.data,
+  //   channelsCount   : samples.channels,
+  //   coef            : 0.9,
+  //   separateChannels: true,
+  // })
 
   // normalizeAmplitudeWithWindow({
   //   samplesData     : samples.data,
