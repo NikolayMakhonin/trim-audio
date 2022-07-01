@@ -18,15 +18,9 @@ export type SearchContentArgs = {
   endExclusive?: number,
 }
 
-export type SearchContentResult = {
-  samplesData: Float32Array,
-  index: number,
-}
-
 export function searchContent(
-  data: WorkerData<SearchContentArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<SearchContentResult> {
+  args: SearchContentArgs,
+): number {
   let {
     samplesData,
     channelsCount,
@@ -39,7 +33,7 @@ export function searchContent(
     maxSilenceSamples,
     start,
     endExclusive,
-  } = data.data
+  } = args
 
   if (windowSamples < 2) {
     throw new Error('windowSamples should be >= 2')
@@ -52,19 +46,9 @@ export function searchContent(
     channels = generateIndexArray(channelsCount)
   }
 
-  function result(index: number): WorkerFunctionServerResultSync<SearchContentResult> {
-    return {
-      data: {
-        samplesData,
-        index,
-      },
-      transferList: [samplesData.buffer],
-    }
-  }
-
   const channelsLength = channels.length
   if (channelsLength === 0) {
-    return result(0)
+    return 0
   }
 
   if (start == null) {
@@ -121,7 +105,7 @@ export function searchContent(
         }
         contentStartEnd = i + 1
         if (contentStartEnd - contentStartIndex - totalSilenceLength >= minContentSamples) {
-          return result(contentStartIndex)
+          return contentStartIndex
         }
       }
       else if (i + 2 - contentStartIndex > windowSamples * 2) {
@@ -131,10 +115,30 @@ export function searchContent(
   }
 
   if (contentStartEnd === 0 || contentStartEnd - contentStartIndex < minContentSamples) {
-    return result(endExclusive)
+    return endExclusive
   }
 
-  return result(contentStartIndex)
+  return contentStartIndex
+}
+
+export type SearchContentResult = {
+  samplesData: Float32Array,
+  result: number,
+}
+
+const _searchContentWorker = searchContent
+export const searchContentWorker = function searchContent(
+  data: WorkerData<SearchContentArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<SearchContentResult> {
+  const result = _searchContentWorker(data.data)
+  return {
+    data: {
+      samplesData: data.data.samplesData,
+      result,
+    },
+    transferList: [data.data.samplesData.buffer],
+  }
 }
 
 export type TrimAudioArgs = {
@@ -158,73 +162,46 @@ export type TrimAudioArgs = {
 }
 
 export function trimAudio(
-  data: WorkerData<TrimAudioArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
-  let {
+  args: TrimAudioArgs,
+): Float32Array {
+  const {
     samplesData,
     channelsCount,
     channels,
     start,
     end,
-  } = data.data
+  } = args
 
   const samplesCount = Math.floor(samplesData.length / channelsCount)
 
-  let trimStart: number
-  if (!start) {
-    trimStart = 0
-  }
-  else {
-    const result = searchContent({
-      data: {
-        samplesData,
-        channelsCount,
-        samplesCount,
-        channels,
-        windowSamples       : start.windowSamples,
-        backward            : false,
-        minContentSamples   : start.minContentSamples,
-        minContentDispersion: start.minContentDispersion,
-        maxSilenceSamples   : start.maxSilenceSamples,
-      },
-      transferList: [samplesData.buffer],
-    })
+  let trimStart = !start ? 0 : searchContent({
+    samplesData,
+    channelsCount,
+    samplesCount,
+    channels,
+    windowSamples       : start.windowSamples,
+    backward            : false,
+    minContentSamples   : start.minContentSamples,
+    minContentDispersion: start.minContentDispersion,
+    maxSilenceSamples   : start.maxSilenceSamples,
+  })
 
-    samplesData = result.data.samplesData
-    trimStart = result.data.index
-  }
-
-  let trimEndExclusive: number
-  if (!end) {
-    trimEndExclusive = samplesCount
-  }
-  else {
-    const result = searchContent({
-      data: {
-        samplesData,
-        channelsCount,
-        samplesCount,
-        channels,
-        windowSamples       : end.windowSamples,
-        backward            : true,
-        minContentSamples   : end.minContentSamples,
-        minContentDispersion: end.minContentDispersion,
-        maxSilenceSamples   : end.maxSilenceSamples,
-        endExclusive        : start
-          && Math.min(samplesCount, samplesCount - trimStart),
-      },
-      transferList: [samplesData.buffer],
-    })
-
-    samplesData = result.data.samplesData
-    trimEndExclusive = samplesCount - 1 - result.data.index + 1
-  }
+  let trimEndExclusive = !end ? samplesCount : samplesCount - 1 - searchContent({
+    samplesData,
+    channelsCount,
+    samplesCount,
+    channels,
+    windowSamples       : end.windowSamples,
+    backward            : true,
+    minContentSamples   : end.minContentSamples,
+    minContentDispersion: end.minContentDispersion,
+    maxSilenceSamples   : end.maxSilenceSamples,
+    endExclusive        : start
+      && Math.min(samplesCount, samplesCount - trimStart),
+  }) + 1
 
   if (trimStart >= trimEndExclusive) {
-    return {
-      data: new Float32Array(0),
-    }
+    return new Float32Array(0)
   }
 
   if (start?.space) {
@@ -234,14 +211,29 @@ export function trimAudio(
     trimEndExclusive = Math.min(samplesCount, trimEndExclusive + end.space)
   }
 
-  const newSamplesData = new Float32Array(
+  return new Float32Array(
     samplesData.buffer,
     trimStart * channelsCount * 4,
     (trimEndExclusive - trimStart) * channelsCount,
   )
+}
 
+export type TrimAudioResult = {
+  samplesData: Float32Array,
+  result: Float32Array,
+}
+
+const _trimAudioWorker = trimAudio
+export const trimAudioWorker = function trimAudio(
+  data: WorkerData<TrimAudioArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<TrimAudioResult> {
+  const result = _trimAudioWorker(data.data)
   return {
-    data        : newSamplesData,
-    transferList: [newSamplesData.buffer],
+    data: {
+      samplesData: data.data.samplesData,
+      result,
+    },
+    transferList: [data.data.samplesData.buffer],
   }
 }

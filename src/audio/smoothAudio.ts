@@ -55,16 +55,15 @@ export type SmoothAudioArgs = {
 }
 
 export function smoothAudio(
-  data: WorkerData<SmoothAudioArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
+  args: SmoothAudioArgs,
+) {
   let {
     samplesData,
     channelsCount,
     channels,
     startSamples,
     endSamples,
-  } = data.data
+  } = args
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -82,9 +81,16 @@ export function smoothAudio(
       })
     }
   }
+}
 
+const _smoothAudioWorker = smoothAudio
+export const smoothAudioWorker = function smoothAudio(
+  data: WorkerData<SmoothAudioArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  _smoothAudioWorker(data.data)
   return {
-    data        : samplesData,
-    transferList: [samplesData.buffer],
+    data        : data.data.samplesData,
+    transferList: [data.data.samplesData.buffer],
   }
 }

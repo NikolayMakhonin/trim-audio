@@ -42,15 +42,12 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
       },
       handle(samplesData, channelsCount) {
         normalizeAmplitudeWithWindow({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-            separateChannels,
-            coef,
-            windowSamples,
-          },
-          transferList: [samplesData.buffer],
+          samplesData,
+          channelsCount,
+          channels,
+          separateChannels,
+          coef,
+          windowSamples,
         })
       },
     })

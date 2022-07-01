@@ -39,15 +39,12 @@ describe('audio > smoothAudio', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         return smoothAudio({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-            startSamples,
-            endSamples,
-          },
-          transferList: [samplesData.buffer],
-        }).data
+          samplesData,
+          channelsCount,
+          channels,
+          startSamples,
+          endSamples,
+        })
       },
     })
   })

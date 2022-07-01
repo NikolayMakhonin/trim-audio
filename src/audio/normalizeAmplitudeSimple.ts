@@ -104,16 +104,15 @@ export type NormalizeAmplitudeSimpleArgs = {
 }
 
 export function normalizeAmplitudeSimple(
-  data: WorkerData<NormalizeAmplitudeSimpleArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
+  args: NormalizeAmplitudeSimpleArgs,
+) {
   let {
     samplesData,
     channelsCount,
     channels,
     separateChannels,
     coef,
-  } = data.data
+  } = args
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -140,9 +139,16 @@ export function normalizeAmplitudeSimple(
       })
     }
   }
+}
 
+const _normalizeAmplitudeSimpleWorker = normalizeAmplitudeSimple
+export const normalizeAmplitudeSimpleWorker = function normalizeAmplitudeSimple(
+  data: WorkerData<NormalizeAmplitudeSimpleArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  _normalizeAmplitudeSimpleWorker(data.data)
   return {
-    data        : samplesData,
-    transferList: [samplesData.buffer],
+    data        : data.data.samplesData,
+    transferList: [data.data.samplesData.buffer],
   }
 }

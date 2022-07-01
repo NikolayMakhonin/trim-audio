@@ -40,14 +40,11 @@ describe('audio > normalizeAmplitudeSimple', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         normalizeAmplitudeSimple({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-            coef,
-            separateChannels,
-          },
-          transferList: [samplesData.buffer],
+          samplesData,
+          channelsCount,
+          channels,
+          coef,
+          separateChannels,
         })
       },
     })

@@ -71,14 +71,13 @@ export type NormalizeOffsetSimpleArgs = {
 }
 
 export function normalizeOffsetSimple(
-  data: WorkerData<NormalizeOffsetSimpleArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
+  args: NormalizeOffsetSimpleArgs,
+) {
   let {
     samplesData,
     channelsCount,
     channels,
-  } = data.data
+  } = args
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -94,9 +93,16 @@ export function normalizeOffsetSimple(
       })
     }
   }
+}
 
+const _normalizeOffsetSimpleWorker = normalizeOffsetSimple
+export const normalizeOffsetSimpleWorker = function normalizeOffsetSimple(
+  data: WorkerData<NormalizeOffsetSimpleArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  _normalizeOffsetSimpleWorker(data.data)
   return {
-    data        : samplesData,
-    transferList: [samplesData.buffer],
+    data        : data.data.samplesData,
+    transferList: [data.data.samplesData.buffer],
   }
 }

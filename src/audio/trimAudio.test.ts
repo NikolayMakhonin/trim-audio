@@ -65,27 +65,24 @@ describe('audio > trimAudio', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         return trimAudio({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-            start: windowSamplesStart && {
-              windowSamples       : windowSamplesStart,
-              minContentSamples   : minContentSamplesStart,
-              minContentDispersion: minContentDispersionStart,
-              maxSilenceSamples   : maxSilenceSamplesStart,
-              space               : spaceStart,
-            },
-            end: windowSamplesEnd && {
-              windowSamples       : windowSamplesEnd,
-              minContentSamples   : minContentSamplesEnd,
-              minContentDispersion: minContentDispersionEnd,
-              maxSilenceSamples   : maxSilenceSamplesEnd,
-              space               : spaceEnd,
-            },
+          samplesData,
+          channelsCount,
+          channels,
+          start: windowSamplesStart && {
+            windowSamples       : windowSamplesStart,
+            minContentSamples   : minContentSamplesStart,
+            minContentDispersion: minContentDispersionStart,
+            maxSilenceSamples   : maxSilenceSamplesStart,
+            space               : spaceStart,
           },
-          transferList: [samplesData.buffer],
-        }).data
+          end: windowSamplesEnd && {
+            windowSamples       : windowSamplesEnd,
+            minContentSamples   : minContentSamplesEnd,
+            minContentDispersion: minContentDispersionEnd,
+            maxSilenceSamples   : maxSilenceSamplesEnd,
+            space               : spaceEnd,
+          },
+        })
       },
     })
   })

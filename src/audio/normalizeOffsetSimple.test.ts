@@ -35,12 +35,9 @@ describe('audio > normalizeOffsetSimple', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         normalizeOffsetSimple({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-          },
-          transferList: [samplesData.buffer],
+          samplesData,
+          channelsCount,
+          channels,
         })
       },
     })

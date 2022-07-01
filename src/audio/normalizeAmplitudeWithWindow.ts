@@ -113,9 +113,8 @@ export type NormalizeAmplitudeWithWindowArgs = {
 }
 
 export function normalizeAmplitudeWithWindow(
-  data: WorkerData<NormalizeAmplitudeWithWindowArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
+  args: NormalizeAmplitudeWithWindowArgs,
+) {
   let {
     samplesData,
     channelsCount,
@@ -124,7 +123,7 @@ export function normalizeAmplitudeWithWindow(
     coef,
     maxMult,
     windowSamples,
-  } = data.data
+  } = args
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -155,9 +154,16 @@ export function normalizeAmplitudeWithWindow(
       })
     }
   }
+}
 
+const _normalizeAmplitudeWithWindowWorker = normalizeAmplitudeWithWindow
+export const normalizeAmplitudeWithWindowWorker = function normalizeAmplitudeWithWindow(
+  data: WorkerData<NormalizeAmplitudeWithWindowArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  _normalizeAmplitudeWithWindowWorker(data.data)
   return {
-    data        : samplesData,
-    transferList: [samplesData.buffer],
+    data        : data.data.samplesData,
+    transferList: [data.data.samplesData.buffer],
   }
 }

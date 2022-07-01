@@ -1,6 +1,8 @@
 import {checkIsNumber, generateIndexArray} from './helpers'
 import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {normalizeOffsetSimple} from "~/src";
+import {NormalizeOffsetSimpleArgs} from "src/audio/normalizeOffsetSimple";
 
 function _normalizeOffsetWithWindow({
   samplesData,
@@ -81,15 +83,14 @@ export type NormalizeOffsetWithWindowArgs = {
 }
 
 export function normalizeOffsetWithWindow(
-  data: WorkerData<NormalizeOffsetWithWindowArgs>,
-  abortSignal?: IAbortSignalFast,
-): WorkerFunctionServerResultSync<Float32Array> {
+  args: NormalizeOffsetWithWindowArgs,
+) {
   let {
     samplesData,
     channelsCount,
     channels,
     windowSamples,
-  } = data.data
+  } = args
 
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
@@ -106,9 +107,16 @@ export function normalizeOffsetWithWindow(
       })
     }
   }
+}
 
+const _normalizeOffsetWithWindowWorker = normalizeOffsetWithWindow
+export const normalizeOffsetWithWindowWorker = function normalizeOffsetWithWindow(
+  data: WorkerData<NormalizeOffsetWithWindowArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  _normalizeOffsetWithWindowWorker(data.data)
   return {
-    data        : samplesData,
-    transferList: [samplesData.buffer],
+    data        : data.data.samplesData,
+    transferList: [data.data.samplesData.buffer],
   }
 }

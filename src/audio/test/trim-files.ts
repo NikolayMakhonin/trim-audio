@@ -87,48 +87,39 @@ export async function trimAudioFile(
     await fse.unlink(outputFilePath)
   }
 
-  samples.data = normalizeOffsetWithWindow({
-    data: {
-      samplesData  : samples.data,
-      channelsCount: samples.channels,
-      windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
-    },
-    transferList: [samples.data.buffer],
-  }).data
+  normalizeOffsetWithWindow({
+    samplesData  : samples.data,
+    channelsCount: samples.channels,
+    windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
+  })
 
   const normalizeCoef = 0.95
 
-  samples.data = normalizeAmplitudeSimple({
-    data: {
-      samplesData     : samples.data,
-      channelsCount   : samples.channels,
-      coef            : normalizeCoef,
-      separateChannels: true,
-    },
-    transferList: [samples.data.buffer],
-  }).data
+  normalizeAmplitudeSimple({
+    samplesData     : samples.data,
+    channelsCount   : samples.channels,
+    coef            : normalizeCoef,
+    separateChannels: true,
+  })
 
-  samples.data = trimAudio({
-    data: {
-      samplesData  : samples.data,
-      channelsCount: samples.channels,
-      start        : {
-        windowSamples       : Math.round(samples.sampleRate * START_WINDOW_DEFAULT / 1000),
-        maxSilenceSamples   : Math.round(samples.sampleRate * START_MAX_SILENCE_DEFAULT / 1000),
-        minContentSamples   : Math.round(samples.sampleRate * START_MIN_CONTENT_DEFAULT / 1000),
-        minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(START_DECIBEL_DEFAULT),
-        space               : Math.round(samples.sampleRate * START_SPACE_DEFAULT / 1000),
-      },
-      end: {
-        windowSamples       : Math.round(samples.sampleRate * END_WINDOW_DEFAULT / 1000),
-        maxSilenceSamples   : Math.round(samples.sampleRate * END_MAX_SILENCE_DEFAULT / 1000),
-        minContentSamples   : Math.round(samples.sampleRate * END_MIN_CONTENT_DEFAULT / 1000),
-        minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(END_DECIBEL_DEFAULT),
-        space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
-      },
+  trimAudio({
+    samplesData  : samples.data,
+    channelsCount: samples.channels,
+    start        : {
+      windowSamples       : Math.round(samples.sampleRate * START_WINDOW_DEFAULT / 1000),
+      maxSilenceSamples   : Math.round(samples.sampleRate * START_MAX_SILENCE_DEFAULT / 1000),
+      minContentSamples   : Math.round(samples.sampleRate * START_MIN_CONTENT_DEFAULT / 1000),
+      minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(START_DECIBEL_DEFAULT),
+      space               : Math.round(samples.sampleRate * START_SPACE_DEFAULT / 1000),
     },
-    transferList: [samples.data.buffer],
-  }).data
+    end: {
+      windowSamples       : Math.round(samples.sampleRate * END_WINDOW_DEFAULT / 1000),
+      maxSilenceSamples   : Math.round(samples.sampleRate * END_MAX_SILENCE_DEFAULT / 1000),
+      minContentSamples   : Math.round(samples.sampleRate * END_MIN_CONTENT_DEFAULT / 1000),
+      minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(END_DECIBEL_DEFAULT),
+      space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
+    },
+  })
 
   // normalizeAmplitudeSimple({
   //   samplesData     : samples.data,
@@ -152,15 +143,12 @@ export async function trimAudioFile(
   //   sampleRate: 44100,
   // }
 
-  samples.data = smoothAudio({
-    data: {
-      samplesData  : samples.data,
-      channelsCount: samples.channels,
-      startSamples : samples.sampleRate * 20 / 1000,
-      endSamples   : samples.sampleRate * 50 / 1000,
-    },
-    transferList: [samples.data.buffer],
-  }).data
+  smoothAudio({
+    samplesData  : samples.data,
+    channelsCount: samples.channels,
+    startSamples : samples.sampleRate * 20 / 1000,
+    endSamples   : samples.sampleRate * 50 / 1000,
+  })
 
   await saveToMp3File(
     ffmpegTransform,

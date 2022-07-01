@@ -37,13 +37,10 @@ describe('audio > normalizeOffsetWithWindow', function () {
       },
       handle(samplesData, channelsCount) {
         normalizeOffsetWithWindow({
-          data: {
-            samplesData,
-            channelsCount,
-            channels,
-            windowSamples,
-          },
-          transferList: [samplesData.buffer],
+          samplesData,
+          channelsCount,
+          channels,
+          windowSamples,
         })
       },
     })
