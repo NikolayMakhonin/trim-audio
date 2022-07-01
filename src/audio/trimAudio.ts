@@ -100,7 +100,8 @@ export function searchContent({
         if (contentStartEnd - contentStartIndex - totalSilenceLength >= minContentSamples) {
           return contentStartIndex
         }
-      } else if (i + 2 - contentStartIndex > windowSamples * 2) {
+      }
+      else if (i + 2 - contentStartIndex > windowSamples * 2) {
         totalSilenceLength++
       }
     }

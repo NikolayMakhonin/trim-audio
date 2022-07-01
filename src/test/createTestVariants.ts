@@ -32,7 +32,7 @@ export function createTestVariants<TArgs extends object>(
 }>) => void {
   return function _testVariants(args) {
     const argsKeys = Object.keys(args)
-    const argsValues = Object.values(args) as any[]
+    const argsValues: any[] = Object.values(args)
     const argsLength = argsKeys.length
 
     const variantArgs: TArgs = {} as any
@@ -82,7 +82,8 @@ export function createTestVariants<TArgs extends object>(
       try {
         iteration++
         test(variantArgs)
-      } catch (err) {
+      }
+      catch (err) {
         console.error(JSON.stringify(variantArgs, null, 2))
         console.error(err)
         // again for debug
@@ -90,7 +91,8 @@ export function createTestVariants<TArgs extends object>(
           // eslint-disable-next-line no-debugger
           debugger
           test(variantArgs)
-        } catch {
+        }
+        catch {
           // eslint-disable-next-line no-debugger
           debugger
         }

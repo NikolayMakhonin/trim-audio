@@ -1,4 +1,4 @@
-import {correctSample, EPSILON, generateIndexArray} from './helpers'
+import {correctSample, generateIndexArray} from './helpers'
 
 function getOffset({
   samplesData,
