@@ -7,7 +7,7 @@ import {FFmpegTransformClientMT, getFFmpegTransform} from '@flemist/ffmpeg-encod
 export const ffmpegTransformClient = new FFmpegTransformClientMT(
   {
     threads : 3,
-    preload : true,
+    preload : false,
     loglevel: 'warning',
     // log     : false,
     // logger({data: {threadId, type, message}}) {
