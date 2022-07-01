@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {normalizeOffsetSimple} from './normalizeOffsetSimple'
 import {SamplesPattern} from './test/generateSamples'
-import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
+import {createTestVariants} from "@flemist/test-variants";
 
 describe('audio > normalizeOffsetSimple', function () {
   this.timeout(30000)
@@ -43,8 +43,8 @@ describe('audio > normalizeOffsetSimple', function () {
     })
   })
 
-  it('silence 0', function () {
-    testVariants({
+  it('silence 0', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -61,11 +61,11 @@ describe('audio > normalizeOffsetSimple', function () {
           ['fill', 0, 1, active ? 0 : amplitude],
         ]),
       ],
-    })
+    })()
   })
 
-  it('silence 1', function () {
-    testVariants({
+  it('silence 1', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -82,11 +82,11 @@ describe('audio > normalizeOffsetSimple', function () {
           ['fill', 0, 100, active ? 0 : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('peak', function () {
-    testVariants({
+  it('peak', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -107,6 +107,6 @@ describe('audio > normalizeOffsetSimple', function () {
           ['fill', 0, 100, active ? -(0.1 + 0.1 * samplesCount) / samplesCount * amplitude : 0],
         ]),
       ],
-    })
+    })()
   })
 })

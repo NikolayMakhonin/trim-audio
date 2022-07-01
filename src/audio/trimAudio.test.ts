@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {SamplesPattern} from './test/generateSamples'
-import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {trimAudio} from './trimAudio'
+import {createTestVariants} from "@flemist/test-variants";
 
 describe('audio > trimAudio', function () {
   this.timeout(30000)
@@ -33,12 +33,12 @@ describe('audio > trimAudio', function () {
 		samplesCountActual: number,
 		channelsCount: number,
 		channels: number[],
-		
+
 		windowSamplesStart: number,
 		minContentSamplesStart: number,
 		minContentDispersionStart: number,
 		maxSilenceSamplesStart: number,
-		
+
 		windowSamplesEnd: number,
 		minContentSamplesEnd: number,
 		minContentDispersionEnd: number,
@@ -87,8 +87,8 @@ describe('audio > trimAudio', function () {
     })
   })
 
-  it('silence 0', function () {
-    testVariants({
+  it('silence 0', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -113,7 +113,7 @@ describe('audio > trimAudio', function () {
 
       spaceStart: [0, 100],
       spaceEnd  : [0, 100],
-			
+
       samplesCountExpect: [0],
       patternsActual    : ({channelsCount, channels, amplitude}) => [
         mapChannels(channelsCount, channels, (channel, active) => [
@@ -121,11 +121,11 @@ describe('audio > trimAudio', function () {
         ]),
       ],
       patternsExpect: () => [null],
-    })
+    })()
   })
 
-  it('silence 1', function () {
-    testVariants({
+  it('silence 1', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -162,11 +162,11 @@ describe('audio > trimAudio', function () {
           ['fill-noise', 0, 100, amplitude],
         ]),
       ],
-    })
+    })()
   })
 
-  it('start', function () {
-    testVariants({
+  it('start', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -200,11 +200,11 @@ describe('audio > trimAudio', function () {
           ['fill-noise', Math.min(position, spaceStart), Math.min(position, spaceStart) + 16, active ? 1 : 0],
         ]),
       ],
-    })
+    })()
   })
 
-  it('end', function () {
-    testVariants({
+  it('end', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -238,11 +238,11 @@ describe('audio > trimAudio', function () {
           ['fill-noise', position, position + 16, active ? 1 : 0],
         ]),
       ],
-    })
+    })()
   })
 
-  it('start/end', function () {
-    testVariants({
+  it('start/end', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -274,11 +274,11 @@ describe('audio > trimAudio', function () {
           ['fill-noise', 0, 16, active ? 1 : 0],
         ]),
       ],
-    })
+    })()
   })
 
-  it('start/end with space', function () {
-    testVariants({
+  it('start/end with space', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -315,11 +315,11 @@ describe('audio > trimAudio', function () {
           ['fill-noise', 65, 77, active ? 1 : 0],
         ]),
       ],
-    })
+    })()
   })
 
-  it('start/end with space silence', function () {
-    testVariants({
+  it('start/end with space silence', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -347,11 +347,11 @@ describe('audio > trimAudio', function () {
         ]),
       ],
       patternsExpect: [null],
-    })
+    })()
   })
 
-  it('start/end with space silence 2', function () {
-    testVariants({
+  it('start/end with space silence 2', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -379,11 +379,11 @@ describe('audio > trimAudio', function () {
         ]),
       ],
       patternsExpect: [null],
-    })
+    })()
   })
 
-  it('start/end skip space', function () {
-    testVariants({
+  it('start/end skip space', async function () {
+    await testVariants({
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -418,6 +418,6 @@ describe('audio > trimAudio', function () {
           ['fill-noise', 7, 11, active ? 1 : 0],
         ]),
       ],
-    })
+    })()
   })
 })

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {SamplesPattern} from './test/generateSamples'
-import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {smoothAudio} from './smoothAudio'
+import {createTestVariants} from "@flemist/test-variants";
 
 describe('audio > smoothAudio', function () {
   this.timeout(30000)
@@ -49,8 +49,8 @@ describe('audio > smoothAudio', function () {
     })
   })
 
-  it('base', function () {
-    testVariants({
+  it('base', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -71,6 +71,6 @@ describe('audio > smoothAudio', function () {
           ['fill', 99, 100, active && endSamples > 0 ? -1 : 0],
         ]),
       ],
-    })
+    })()
   })
 })

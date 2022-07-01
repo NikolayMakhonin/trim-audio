@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import {SamplesPattern} from './test/generateSamples'
-import {createTestVariants} from '../test/createTestVariants'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 import {sign} from './test/sign'
+import {createTestVariants} from "@flemist/test-variants";
 
 describe('audio > normalizeAmplitudeWithWindow', function () {
   this.timeout(30000)
@@ -53,8 +53,8 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
     })
   })
 
-  it('silence 0', function () {
-    testVariants({
+  it('silence 0', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -74,11 +74,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 0, 1, active ? 0 : amplitude],
         ]),
       ],
-    })
+    })()
   })
 
-  it('silence 1', function () {
-    testVariants({
+  it('silence 1', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -98,11 +98,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 0, 100, active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('peak start', function () {
-    testVariants({
+  it('peak start', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -126,11 +126,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', windowSamples + Math.ceil(windowSamples / 2), 100, active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('peak end', function () {
-    testVariants({
+  it('peak end', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -154,11 +154,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 0, 100 - 2 * windowSamples + Math.ceil(windowSamples / 2), active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('peak middle', function () {
-    testVariants({
+  it('peak middle', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -184,11 +184,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 50 + windowSamples + Math.ceil(windowSamples / 2), 100, active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('peak start/end', function () {
-    testVariants({
+  it('peak start/end', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -216,11 +216,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 99, 100, active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('separateChannels', function () {
-    testVariants({
+  it('separateChannels', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -251,11 +251,11 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 99, 100, active ? 0.6 * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 
-  it('not separateChannels', function () {
-    testVariants({
+  it('not separateChannels', async function () {
+    await testVariants({
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -283,6 +283,6 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
           ['fill', 99, 100, active ? [0.6, 0.4, 0.2][channel] * sign(amplitude) : 0.1],
         ]),
       ],
-    })
+    })()
   })
 })
