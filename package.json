@@ -85,9 +85,9 @@
   },
   "dependencies": {
     "@flemist/abort-controller-fast": "^0.0.5",
-    "@flemist/ffmpeg-encode-decode": "^0.0.8",
+    "@flemist/ffmpeg-encode-decode": "^0.0.10",
     "@flemist/ffmpeg.wasm-core-st": "^0.10.2",
-    "@flemist/worker-server": "^0.0.1",
+    "@flemist/worker-server": "^0.0.4",
     "@stdlib/math-base-special-erfcinv": "^0.0.6",
     "@stdlib/math-base-special-erfinv": "^0.0.6",
     "tslib": "^2.4.0"

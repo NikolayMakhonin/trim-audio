@@ -1,4 +1,6 @@
 import {correctSample, generateIndexArray} from './helpers'
+import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function getOffset({
   samplesData,
@@ -62,29 +64,39 @@ function _normalizeOffsetSimple({
   })
 }
 
-export function normalizeOffsetSimple({
-  samplesData,
-  channelsCount,
-  channels,
-}: {
+export type NormalizeOffsetSimpleArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
-}) {
+}
+
+export function normalizeOffsetSimple(
+  data: WorkerData<NormalizeOffsetSimpleArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  let {
+    samplesData,
+    channelsCount,
+    channels,
+  } = data.data
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }
 
   const channelsLength = channels.length
-  if (channelsLength === 0) {
-    return
+  if (channelsLength !== 0) {
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      _normalizeOffsetSimple({
+        samplesData,
+        channelsCount,
+        channel: channels[nChannel],
+      })
+    }
   }
 
-  for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-    _normalizeOffsetSimple({
-      samplesData,
-      channelsCount,
-      channel: channels[nChannel],
-    })
+  return {
+    data        : samplesData,
+    transferList: [samplesData.buffer],
   }
 }

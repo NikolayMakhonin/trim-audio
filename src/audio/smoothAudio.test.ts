@@ -3,7 +3,7 @@ import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {smoothAudio} from './smoothAudio'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > smoothAudio', function () {
   this.timeout(30000)
@@ -39,12 +39,15 @@ describe('audio > smoothAudio', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         return smoothAudio({
-          samplesData,
-          channelsCount,
-          channels,
-          startSamples,
-          endSamples,
-        })
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+            startSamples,
+            endSamples,
+          },
+          transferList: [samplesData.buffer],
+        }).data
       },
     })
   })

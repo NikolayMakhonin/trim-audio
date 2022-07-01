@@ -3,7 +3,7 @@ import {normalizeOffsetSimple} from './normalizeOffsetSimple'
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > normalizeOffsetSimple', function () {
   this.timeout(30000)
@@ -35,9 +35,12 @@ describe('audio > normalizeOffsetSimple', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         normalizeOffsetSimple({
-          samplesData,
-          channelsCount,
-          channels,
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+          },
+          transferList: [samplesData.buffer],
         })
       },
     })

@@ -6,13 +6,16 @@ import {FFmpegTransformClientMT, getFFmpegTransform} from '@flemist/ffmpeg-encod
 
 export const ffmpegTransformClient = new FFmpegTransformClientMT(
   {
-    threads : 3,
-    preload : false,
-    loglevel: 'warning',
-    // log     : false,
-    // logger({data: {threadId, type, message}}) {
-    // 	console.log(`[${threadId}] [${type}] ${message}`)
-    // },
+    threads: 3,
+    preInit: false,
+    options: {
+      preload : false,
+      loglevel: 'warning',
+      // log     : false,
+      // logger({data: {threadId, type, message}}) {
+      // 	console.log(`[${threadId}] [${type}] ${message}`)
+      // },
+    },
   },
 )
 

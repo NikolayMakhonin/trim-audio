@@ -1,4 +1,6 @@
 import {correctSample, EPSILON, generateIndexArray} from './helpers'
+import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function _normalizeAmplitudeWithWindow({
   samplesData,
@@ -100,15 +102,7 @@ function _normalizeAmplitudeWithWindow({
   _normalize(i + windowSamples)
 }
 
-export function normalizeAmplitudeWithWindow({
-  samplesData,
-  channelsCount,
-  channels,
-  separateChannels,
-  coef,
-  maxMult,
-  windowSamples,
-}: {
+export type NormalizeAmplitudeWithWindowArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
@@ -116,36 +110,54 @@ export function normalizeAmplitudeWithWindow({
   coef: number,
   maxMult?: number,
   windowSamples: number,
-}) {
+}
+
+export function normalizeAmplitudeWithWindow(
+  data: WorkerData<NormalizeAmplitudeWithWindowArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  let {
+    samplesData,
+    channelsCount,
+    channels,
+    separateChannels,
+    coef,
+    maxMult,
+    windowSamples,
+  } = data.data
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }
 
   const channelsLength = channels.length
-  if (channelsLength === 0) {
-    return
-  }
-
-  if (separateChannels) {
-    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+  if (channelsLength !== 0) {
+    if (separateChannels) {
+      for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+        _normalizeAmplitudeWithWindow({
+          samplesData,
+          channelsCount,
+          channels: [channels[nChannel]],
+          coef,
+          maxMult,
+          windowSamples,
+        })
+      }
+    }
+    else {
       _normalizeAmplitudeWithWindow({
         samplesData,
         channelsCount,
-        channels: [channels[nChannel]],
+        channels,
         coef,
         maxMult,
         windowSamples,
       })
     }
-    return
   }
 
-  _normalizeAmplitudeWithWindow({
-    samplesData,
-    channelsCount,
-    channels,
-    coef,
-    maxMult,
-    windowSamples,
-  })
+  return {
+    data        : samplesData,
+    transferList: [samplesData.buffer],
+  }
 }

@@ -1,4 +1,6 @@
 import {generateIndexArray} from './helpers'
+import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function _smoothAudio({
   samplesData,
@@ -44,35 +46,45 @@ function _smoothAudio({
   }
 }
 
-export function smoothAudio({
-  samplesData,
-  channelsCount,
-  channels,
-  startSamples,
-  endSamples,
-}: {
+export type SmoothAudioArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   startSamples: number,
   endSamples: number,
-}) {
+}
+
+export function smoothAudio(
+  data: WorkerData<SmoothAudioArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  let {
+    samplesData,
+    channelsCount,
+    channels,
+    startSamples,
+    endSamples,
+  } = data.data
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }
 
   const channelsLength = channels.length
-  if (channelsLength === 0) {
-    return
+  if (channelsLength !== 0) {
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      _smoothAudio({
+        samplesData,
+        channelsCount,
+        channel: channels[nChannel],
+        startSamples,
+        endSamples,
+      })
+    }
   }
 
-  for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-    _smoothAudio({
-      samplesData,
-      channelsCount,
-      channel: channels[nChannel],
-      startSamples,
-      endSamples,
-    })
+  return {
+    data        : samplesData,
+    transferList: [samplesData.buffer],
   }
 }

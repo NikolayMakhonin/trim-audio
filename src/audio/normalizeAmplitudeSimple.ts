@@ -1,4 +1,6 @@
 import {correctSample, EPSILON, generateIndexArray} from './helpers'
+import type {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import type {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function getMaxAmplitude({
   samplesData,
@@ -93,44 +95,54 @@ function _normalizeAmplitudeSimple({
   }
 }
 
-export function normalizeAmplitudeSimple({
-  samplesData,
-  channelsCount,
-  channels,
-  separateChannels,
-  coef,
-}: {
+export type NormalizeAmplitudeSimpleArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   separateChannels?: boolean,
   coef: number,
-}) {
+}
+
+export function normalizeAmplitudeSimple(
+  data: WorkerData<NormalizeAmplitudeSimpleArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  let {
+    samplesData,
+    channelsCount,
+    channels,
+    separateChannels,
+    coef,
+  } = data.data
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }
 
   const channelsLength = channels.length
-  if (channelsLength === 0) {
-    return
-  }
-
-  if (separateChannels) {
-    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+  if (channelsLength !== 0) {
+    if (separateChannels) {
+      for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+        _normalizeAmplitudeSimple({
+          samplesData,
+          channelsCount,
+          channels: [channels[nChannel]],
+          coef,
+        })
+      }
+    }
+    else {
       _normalizeAmplitudeSimple({
         samplesData,
         channelsCount,
-        channels: [channels[nChannel]],
+        channels,
         coef,
       })
     }
-    return
   }
 
-  _normalizeAmplitudeSimple({
-    samplesData,
-    channelsCount,
-    channels,
-    coef,
-  })
+  return {
+    data        : samplesData,
+    transferList: [samplesData.buffer],
+  }
 }

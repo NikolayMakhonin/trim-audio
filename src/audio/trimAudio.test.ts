@@ -3,7 +3,7 @@ import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {trimAudio} from './trimAudio'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > trimAudio', function () {
   this.timeout(30000)
@@ -65,24 +65,27 @@ describe('audio > trimAudio', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         return trimAudio({
-          samplesData,
-          channelsCount,
-          channels,
-          start: windowSamplesStart && {
-            windowSamples       : windowSamplesStart,
-            minContentSamples   : minContentSamplesStart,
-            minContentDispersion: minContentDispersionStart,
-            maxSilenceSamples   : maxSilenceSamplesStart,
-            space               : spaceStart,
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+            start: windowSamplesStart && {
+              windowSamples       : windowSamplesStart,
+              minContentSamples   : minContentSamplesStart,
+              minContentDispersion: minContentDispersionStart,
+              maxSilenceSamples   : maxSilenceSamplesStart,
+              space               : spaceStart,
+            },
+            end: windowSamplesEnd && {
+              windowSamples       : windowSamplesEnd,
+              minContentSamples   : minContentSamplesEnd,
+              minContentDispersion: minContentDispersionEnd,
+              maxSilenceSamples   : maxSilenceSamplesEnd,
+              space               : spaceEnd,
+            },
           },
-          end: windowSamplesEnd && {
-            windowSamples       : windowSamplesEnd,
-            minContentSamples   : minContentSamplesEnd,
-            minContentDispersion: minContentDispersionEnd,
-            maxSilenceSamples   : maxSilenceSamplesEnd,
-            space               : spaceEnd,
-          },
-        })
+          transferList: [samplesData.buffer],
+        }).data
       },
     })
   })

@@ -3,7 +3,7 @@ import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > normalizeOffsetWithWindow', function () {
   this.timeout(30000)
@@ -37,10 +37,13 @@ describe('audio > normalizeOffsetWithWindow', function () {
       },
       handle(samplesData, channelsCount) {
         normalizeOffsetWithWindow({
-          samplesData,
-          channelsCount,
-          channels,
-          windowSamples,
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+            windowSamples,
+          },
+          transferList: [samplesData.buffer],
         })
       },
     })

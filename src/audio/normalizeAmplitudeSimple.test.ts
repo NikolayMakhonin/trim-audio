@@ -4,7 +4,7 @@ import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {sign} from './test/sign'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > normalizeAmplitudeSimple', function () {
   this.timeout(30000)
@@ -40,11 +40,14 @@ describe('audio > normalizeAmplitudeSimple', function () {
       },
       handle(samplesData, channelsCount, samplesCount) {
         normalizeAmplitudeSimple({
-          samplesData,
-          channelsCount,
-          channels,
-          coef,
-          separateChannels,
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+            coef,
+            separateChannels,
+          },
+          transferList: [samplesData.buffer],
         })
       },
     })

@@ -1,4 +1,6 @@
 import {checkIsNumber, generateIndexArray} from './helpers'
+import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function _normalizeOffsetWithWindow({
   samplesData,
@@ -71,32 +73,42 @@ function _normalizeOffsetWithWindow({
   _normalize(i + windowSamples)
 }
 
-export function normalizeOffsetWithWindow({
-  samplesData,
-  channelsCount,
-  channels,
-  windowSamples,
-}: {
+export type NormalizeOffsetWithWindowArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
   windowSamples: number,
-}) {
+}
+
+export function normalizeOffsetWithWindow(
+  data: WorkerData<NormalizeOffsetWithWindowArgs>,
+  abortSignal?: IAbortSignalFast,
+): WorkerFunctionServerResultSync<Float32Array> {
+  let {
+    samplesData,
+    channelsCount,
+    channels,
+    windowSamples,
+  } = data.data
+
   if (channels == null) {
     channels = generateIndexArray(channelsCount)
   }
 
   const channelsLength = channels.length
-  if (channelsLength === 0) {
-    return
+  if (channelsLength !== 0) {
+    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+      _normalizeOffsetWithWindow({
+        samplesData,
+        channelsCount,
+        channel: channels[nChannel],
+        windowSamples,
+      })
+    }
   }
 
-  for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-    _normalizeOffsetWithWindow({
-      samplesData,
-      channelsCount,
-      channel: channels[nChannel],
-      windowSamples,
-    })
+  return {
+    data        : samplesData,
+    transferList: [samplesData.buffer],
   }
 }

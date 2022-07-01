@@ -4,7 +4,7 @@ import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
 import {sign} from './test/sign'
-import {createTestVariants} from "@flemist/test-variants";
+import {createTestVariants} from '@flemist/test-variants'
 
 describe('audio > normalizeAmplitudeWithWindow', function () {
   this.timeout(30000)
@@ -42,12 +42,15 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
       },
       handle(samplesData, channelsCount) {
         normalizeAmplitudeWithWindow({
-          samplesData,
-          channelsCount,
-          channels,
-          separateChannels,
-          coef,
-          windowSamples,
+          data: {
+            samplesData,
+            channelsCount,
+            channels,
+            separateChannels,
+            coef,
+            windowSamples,
+          },
+          transferList: [samplesData.buffer],
         })
       },
     })
