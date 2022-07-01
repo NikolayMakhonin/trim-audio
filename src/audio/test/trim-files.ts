@@ -3,12 +3,11 @@ import globby from 'globby'
 import path from 'path'
 import {getAssetData} from './loadAsset'
 import {AudioSamples} from '../contracts'
-import {ffmpegDecode, ffmpegEncode, ffmpegEncodeMp3Params} from '@flemist/ffmpeg-encode-decode'
+import {ffmpegDecode, ffmpegEncode, ffmpegEncodeMp3Params, FFmpegTransform} from '@flemist/ffmpeg-encode-decode'
 import {normalizeOffsetWithWindow} from '../normalizeOffsetWithWindow'
 import {normalizeAmplitudeSimple} from '../normalizeAmplitudeSimple'
 import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
-import {normalizeAmplitudeWithWindow} from '../normalizeAmplitudeWithWindow'
 import {smoothAudio} from '../smoothAudio'
 
 // const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
@@ -26,45 +25,59 @@ const END_SPACE_DEFAULT = 100
 const END_MAX_SILENCE_DEFAULT = 350
 const END_MIN_CONTENT_DEFAULT = 200
 
-async function readAudioFile(filePath: string): Promise<AudioSamples> {
+async function readAudioFile(
+  ffmpegTransform: FFmpegTransform,
+  filePath: string,
+): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
 
-  const samples: AudioSamples = await ffmpegDecode(data, {
-    channels  : 1,
-    sampleRate: 44100,
-  })
+  const samples: AudioSamples = await ffmpegDecode(
+    ffmpegTransform,
+    data, {
+      channels  : 1,
+      sampleRate: 44100,
+    })
 
   return samples
 }
 
-async function saveToMp3File(filePath, samples: AudioSamples) {
-  if (samples.data.length < 256) {
-    throw new Error('samples.data.length === ' + samples.data.length)
-  }
-  const data: Uint8Array = await ffmpegEncode(samples, {
-    outputFormat: 'mp3', // same as file extension
-    // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
-    params      : ffmpegEncodeMp3Params({
-      mode       : 'vbr',
-      vbrQuality : 8,
-      jointStereo: true,
-    }),
-  })
+async function saveToMp3File(
+  ffmpegTransform: FFmpegTransform,
+  filePath,
+  samples: AudioSamples,
+) {
+  // if (samples.data.length < 256) {
+  //   throw new Error('samples.data.length === ' + samples.data.length)
+  // }
+  const data: Uint8Array = await ffmpegEncode(
+    ffmpegTransform,
+    samples,
+    {
+      outputFormat: 'mp3', // same as file extension
+      // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
+      params      : ffmpegEncodeMp3Params({
+        mode       : 'vbr',
+        vbrQuality : 8,
+        jointStereo: true,
+      }),
+    })
 
   await fse.writeFile(filePath, data)
 }
 
-export async function trimAudioFile({
-  inputFilePath,
-  outputFilePath,
-}: {
+export async function trimAudioFile(
+  ffmpegTransform,
+  {
+    inputFilePath,
+    outputFilePath,
+  }: {
   inputFilePath: string,
   outputFilePath: string,
 }) {
   inputFilePath = path.resolve(inputFilePath)
   outputFilePath = path.resolve(outputFilePath)
 
-  const samples = await readAudioFile(inputFilePath)
+  const samples = await readAudioFile(ffmpegTransform, inputFilePath)
 
   const dir = path.dirname(outputFilePath)
   if (!fse.existsSync(dir)) {
@@ -124,6 +137,12 @@ export async function trimAudioFile({
   //   separateChannels: true,
   // })
 
+  // const samples: AudioSamples = {
+  //   data      : new Float32Array(44100),
+  //   channels  : 2,
+  //   sampleRate: 44100,
+  // }
+
   smoothAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
@@ -131,17 +150,26 @@ export async function trimAudioFile({
     endSamples   : samples.sampleRate * 50 / 1000,
   })
 
-  await saveToMp3File(outputFilePath, samples)
+  await saveToMp3File(
+    ffmpegTransform,
+    outputFilePath,
+    samples,
+  )
 }
 
-export async function trimAudioFiles({
-  inputFilesGlobs,
-  getOutputFilePath,
-}: {
+export async function trimAudioFiles(
+  ffmpegTransform: FFmpegTransform,
+  {
+    inputFilesGlobs,
+    getOutputFilePath,
+  }: {
   inputFilesGlobs: string[],
   getOutputFilePath: (inputFilePath: string) => string,
 }) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
+  if (inputFilesPaths.length === 0) {
+    throw new Error(`There is no files:\r\n${inputFilesGlobs.join('\r\n')}`)
+  }
   inputFilesPaths.sort()
 
   // await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
@@ -153,12 +181,15 @@ export async function trimAudioFiles({
     }
 
     try {
-      await trimAudioFile({
-        inputFilePath,
-        outputFilePath,
-      })
+      await trimAudioFile(
+        ffmpegTransform,
+        {
+          inputFilePath,
+          outputFilePath,
+        })
       console.log('OK: ' + outputFilePath)
-    } catch (err) {
+    }
+    catch (err) {
       console.log('ERROR: ' + inputFilePath + '\r\n' + (err.stack || err.message || err))
       throw err
     }
@@ -168,20 +199,24 @@ export async function trimAudioFiles({
   console.log('Completed!')
 }
 
-export function trimAudioFilesFromDir({
-  inputDir,
-  inputFilesRelativeGlobs,
-  outputDir,
-}: {
+export function trimAudioFilesFromDir(
+  ffmpegTransform: FFmpegTransform,
+  {
+    inputDir,
+    inputFilesRelativeGlobs,
+    outputDir,
+  }: {
   inputDir: string,
   inputFilesRelativeGlobs: string[],
   outputDir: string,
 }) {
-  return trimAudioFiles({
-    inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
-    getOutputFilePath(filePath) {
-      return path.resolve(outputDir, path.relative(inputDir, filePath))
-        .replace(/\.\w+$/, '') + '.mp3'
-    },
-  })
+  return trimAudioFiles(
+    ffmpegTransform,
+    {
+      inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
+      getOutputFilePath(filePath) {
+        return path.resolve(outputDir, path.relative(inputDir, filePath))
+          .replace(/\.\w+$/, '') + '.mp3'
+      },
+    })
 }

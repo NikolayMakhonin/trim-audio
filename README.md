@@ -5,6 +5,10 @@
 
 Normalize and trim audio in Float32Array format
 
+# License
+
+[Unlimited Free](LICENSE)
+
 [npm-image]: https://img.shields.io/npm/v/@flemist/trim-audio.svg
 [npm-url]: https://npmjs.org/package/@flemist/trim-audio
 [downloads-image]: https://img.shields.io/npm/dm/@flemist/trim-audio.svg

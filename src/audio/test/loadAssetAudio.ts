@@ -1,14 +1,20 @@
 import {getAssetData} from './loadAsset'
 import {AudioSamples} from '../contracts'
-import {ffmpegDecode} from '@flemist/ffmpeg-encode-decode'
+import {ffmpegDecode, FFmpegTransform} from '@flemist/ffmpeg-encode-decode'
 
-export async function loadAssetAudio(assetFileName: string) {
+export async function loadAssetAudio(
+  ffmpegTransform: FFmpegTransform,
+  assetFileName: string,
+) {
   const data = await getAssetData(assetFileName)
 
-  const samples: AudioSamples = await ffmpegDecode(data, {
-    channels  : 2,
-    sampleRate: 44100,
-  })
+  const samples: AudioSamples = await ffmpegDecode(
+    ffmpegTransform,
+    data,
+    {
+      channels  : 2,
+      sampleRate: 44100,
+    })
 
   return samples
 }
