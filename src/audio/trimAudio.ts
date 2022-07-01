@@ -178,8 +178,8 @@ export function trimAudio({
   }
 
   return new Float32Array(
-      samplesData.buffer,
-      trimStart * channelsCount * 4,
-      (trimEndExclusive - trimStart) * channelsCount,
-    )
+    samplesData.buffer,
+    trimStart * channelsCount * 4,
+    (trimEndExclusive - trimStart) * channelsCount,
+  )
 }
