@@ -2,7 +2,7 @@
 import {checkSamples} from './checkSamples'
 import {generateSamples, SamplesPattern} from './generateSamples'
 
-export function testSamples({
+export async function testSamples({
   actual,
   expect,
   handle,
@@ -26,7 +26,7 @@ export function testSamples({
     samplesData: Float32Array,
     channelsCount: number,
     samplesCount: number,
-  ) => void | Float32Array,
+  ) => Promise<Float32Array|void> | Float32Array|void,
   maxDiff?: number,
 }) {
   const _actual = {
@@ -41,11 +41,15 @@ export function testSamples({
   }
   expect.fillData(_expect.samplesData, expect.channelsCount, expect.samplesCount)
 
-  _actual.samplesData = handle(
+  const result = await handle(
     _actual.samplesData,
     _actual.channelsCount,
     actual.samplesCount,
-  ) || _actual.samplesData
+  )
+
+  if (result) {
+    _actual.samplesData = result
+  }
 
   checkSamples({
     actual: _actual,
@@ -71,7 +75,11 @@ export function testSamplesWithPatterns({
     patterns: SamplesPattern[][],
   },
   maxDiff?: number,
-  handle: (samplesData: Float32Array, channelsCount: number, samplesCount: number) => void,
+  handle: (
+    samplesData: Float32Array,
+    channelsCount: number,
+    samplesCount: number,
+  ) => Promise<Float32Array|void> | Float32Array|void,
 }) {
   return testSamples({
     actual: {

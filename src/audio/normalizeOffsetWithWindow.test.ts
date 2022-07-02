@@ -2,13 +2,15 @@
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {normalizeOffsetWithWindow} from './normalizeOffsetWithWindow'
+import {normalizeOffsetWithWindow, NormalizeOffsetWithWindowArgs} from './normalizeOffsetWithWindow'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > normalizeOffsetWithWindow', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
     samplesCount,
     channelsCount,
     channels,
@@ -16,6 +18,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
     patternsActual,
     patternsExpect,
   }: {
+    useWorker: boolean,
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
@@ -35,19 +38,28 @@ describe('audio > normalizeOffsetWithWindow', function () {
         channelsCount,
         patterns: patternsExpect,
       },
-      handle(samplesData, channelsCount) {
-        normalizeOffsetWithWindow({
+      async handle(samplesData, channelsCount) {
+        const args: NormalizeOffsetWithWindowArgs = {
           samplesData,
           channelsCount,
           channels,
           windowSamples,
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.normalizeOffsetWithWindow(args)
+          return data.data
+        }
+        else {
+          normalizeOffsetWithWindow(args)
+        }
       },
     })
   })
 
   it('silence 0', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -70,6 +82,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 
   it('silence 1', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -92,6 +105,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 
   it('peak start', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -119,6 +133,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 
   it('peak end', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -146,6 +161,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 
   it('peak middle', async function () {
     await testVariants({
+      useWorker    : [false, true],
       windowSamples: [10, 2, 1, 5, 25],
       samplesCount : [100],
       channelsCount: [1, 2, 3],

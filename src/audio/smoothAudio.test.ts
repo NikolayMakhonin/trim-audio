@@ -2,13 +2,15 @@
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {smoothAudio} from './smoothAudio'
+import {smoothAudio, SmoothAudioArgs} from './smoothAudio'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > smoothAudio', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
     samplesCount,
     channelsCount,
     channels,
@@ -17,6 +19,7 @@ describe('audio > smoothAudio', function () {
     patternsActual,
     patternsExpect,
   }: {
+    useWorker: boolean,
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
@@ -37,20 +40,29 @@ describe('audio > smoothAudio', function () {
         channelsCount,
         patterns: patternsExpect,
       },
-      handle(samplesData, channelsCount, samplesCount) {
-        return smoothAudio({
+      async handle(samplesData, channelsCount, samplesCount) {
+        const args: SmoothAudioArgs = {
           samplesData,
           channelsCount,
           channels,
           startSamples,
           endSamples,
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.smoothAudio(args)
+          return data.data
+        }
+        else {
+          return smoothAudio(args)
+        }
       },
     })
   })
 
   it('base', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]

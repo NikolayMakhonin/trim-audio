@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import {normalizeAmplitudeSimple} from './normalizeAmplitudeSimple'
+import {normalizeAmplitudeSimple, NormalizeAmplitudeSimpleArgs} from './normalizeAmplitudeSimple'
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {sign} from './test/sign'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > normalizeAmplitudeSimple', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
     samplesCount,
     channelsCount,
     channels,
@@ -18,6 +20,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
     coef,
     separateChannels,
   }: {
+    useWorker: boolean,
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
@@ -38,20 +41,29 @@ describe('audio > normalizeAmplitudeSimple', function () {
         channelsCount,
         patterns: patternsExpect,
       },
-      handle(samplesData, channelsCount, samplesCount) {
-        normalizeAmplitudeSimple({
+      async handle(samplesData, channelsCount, samplesCount) {
+        const args: NormalizeAmplitudeSimpleArgs = {
           samplesData,
           channelsCount,
           channels,
           coef,
           separateChannels,
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.normalizeAmplitudeSimple(args)
+          return data.data
+        }
+        else {
+          normalizeAmplitudeSimple(args)
+        }
       },
     })
   })
 
   it('silence 0', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -75,6 +87,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 
   it('silence 1', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -98,6 +111,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 
   it('peak', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -124,6 +138,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 
   it('separateChannels', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -150,6 +165,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 
   it('not separateChannels', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]

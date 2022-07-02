@@ -1,20 +1,23 @@
 /* eslint-disable @typescript-eslint/no-shadow */
-import {normalizeOffsetSimple} from './normalizeOffsetSimple'
+import {normalizeOffsetSimple, NormalizeOffsetSimpleArgs} from './normalizeOffsetSimple'
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > normalizeOffsetSimple', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
     samplesCount,
     channelsCount,
     channels,
     patternsActual,
     patternsExpect,
   }: {
+    useWorker: boolean,
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
@@ -33,18 +36,27 @@ describe('audio > normalizeOffsetSimple', function () {
         channelsCount,
         patterns: patternsExpect,
       },
-      handle(samplesData, channelsCount, samplesCount) {
-        normalizeOffsetSimple({
+      async handle(samplesData, channelsCount, samplesCount) {
+        const args: NormalizeOffsetSimpleArgs = {
           samplesData,
           channelsCount,
           channels,
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.normalizeOffsetSimple(args)
+          return data.data
+        }
+        else {
+          normalizeOffsetSimple(args)
+        }
       },
     })
   })
 
   it('silence 0', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -66,6 +78,7 @@ describe('audio > normalizeOffsetSimple', function () {
 
   it('silence 1', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -87,6 +100,7 @@ describe('audio > normalizeOffsetSimple', function () {
 
   it('peak', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]

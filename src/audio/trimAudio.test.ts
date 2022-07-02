@@ -2,13 +2,16 @@
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {trimAudio} from './trimAudio'
+import {trimAudio, TrimAudioArgs} from './trimAudio'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > trimAudio', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
+
     samplesCountActual,
     channelsCount,
     channels,
@@ -30,6 +33,8 @@ describe('audio > trimAudio', function () {
     patternsActual,
     patternsExpect,
   }: {
+    useWorker: boolean,
+
 		samplesCountActual: number,
 		channelsCount: number,
 		channels: number[],
@@ -63,8 +68,8 @@ describe('audio > trimAudio', function () {
         channelsCount,
         patterns    : patternsExpect,
       },
-      handle(samplesData, channelsCount, samplesCount) {
-        return trimAudio({
+      async handle(samplesData, channelsCount, samplesCount) {
+        const args: TrimAudioArgs = {
           samplesData,
           channelsCount,
           channels,
@@ -82,13 +87,22 @@ describe('audio > trimAudio', function () {
             maxSilenceSamples   : maxSilenceSamplesEnd,
             space               : spaceEnd,
           },
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.trimAudio(args)
+          return data.data
+        }
+        else {
+          return trimAudio(args)
+        }
       },
     })
   })
 
   it('silence 0', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -126,6 +140,7 @@ describe('audio > trimAudio', function () {
 
   it('silence 1', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -167,6 +182,7 @@ describe('audio > trimAudio', function () {
 
   it('start', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -205,6 +221,7 @@ describe('audio > trimAudio', function () {
 
   it('end', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -243,6 +260,7 @@ describe('audio > trimAudio', function () {
 
   it('start/end', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -279,6 +297,7 @@ describe('audio > trimAudio', function () {
 
   it('start/end with space', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -320,6 +339,7 @@ describe('audio > trimAudio', function () {
 
   it('start/end with space silence', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -352,6 +372,7 @@ describe('audio > trimAudio', function () {
 
   it('start/end with space silence 2', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -384,6 +405,7 @@ describe('audio > trimAudio', function () {
 
   it('start/end skip space', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCountActual: [100],
       channelsCount     : [1, 2, 3],
       channels          : ({channelsCount}) => channelsCount === 1 ? [[0]]

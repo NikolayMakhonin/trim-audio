@@ -2,14 +2,16 @@
 import {SamplesPattern} from './test/generateSamples'
 import {testSamplesWithPatterns} from './test/testSamples'
 import {mapChannels} from './test/mapChannels'
-import {normalizeAmplitudeWithWindow} from './normalizeAmplitudeWithWindow'
+import {normalizeAmplitudeWithWindow, NormalizeAmplitudeWithWindowArgs} from './normalizeAmplitudeWithWindow'
 import {sign} from './test/sign'
 import {createTestVariants} from '@flemist/test-variants'
+import {audioClient} from 'src/audio/test/audioClient'
 
 describe('audio > normalizeAmplitudeWithWindow', function () {
   this.timeout(30000)
 
   const testVariants = createTestVariants(({
+    useWorker,
     samplesCount,
     channelsCount,
     channels,
@@ -19,6 +21,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
     patternsActual,
     patternsExpect,
   }: {
+    useWorker: boolean,
 		samplesCount: number,
 		channelsCount: number,
 		channels: number[],
@@ -40,21 +43,30 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
         channelsCount,
         patterns: patternsExpect,
       },
-      handle(samplesData, channelsCount) {
-        normalizeAmplitudeWithWindow({
+      async handle(samplesData, channelsCount) {
+        const args: NormalizeAmplitudeWithWindowArgs = {
           samplesData,
           channelsCount,
           channels,
           separateChannels,
           coef,
           windowSamples,
-        })
+        }
+
+        if (useWorker) {
+          const data = await audioClient.normalizeAmplitudeWithWindow(args)
+          return data.data
+        }
+        else {
+          normalizeAmplitudeWithWindow(args)
+        }
       },
     })
   })
 
   it('silence 0', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -79,6 +91,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('silence 1', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -103,6 +116,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('peak start', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -131,6 +145,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('peak end', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -159,6 +174,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('peak middle', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -189,6 +205,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('peak start/end', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -221,6 +238,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('separateChannels', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
@@ -256,6 +274,7 @@ describe('audio > normalizeAmplitudeWithWindow', function () {
 
   it('not separateChannels', async function () {
     await testVariants({
+      useWorker    : [false, true],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
