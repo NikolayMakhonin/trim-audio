@@ -3,7 +3,7 @@ import {trimAudioFile, trimAudioFilesFromDir} from './trim-files'
 import {getAssetPath} from './loadAsset'
 import {getTempFilePath} from './saveTempFile'
 import {FFmpegTransformClientPool, getFFmpegTransform} from '@flemist/ffmpeg-encode-decode'
-import {IPoolRunner, Pool, PoolRunner, Pools} from '@flemist/time-limits'
+import {Pool, PoolRunner, Pools} from '@flemist/time-limits'
 import {AudioClientPool} from 'src/audio/AudioClientPool'
 
 const threadsPool = new Pool(7)
