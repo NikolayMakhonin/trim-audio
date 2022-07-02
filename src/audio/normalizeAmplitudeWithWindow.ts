@@ -1,6 +1,6 @@
 import {correctSample, EPSILON, generateIndexArray} from './helpers'
-import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
-import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import type {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
+import type {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 function _normalizeAmplitudeWithWindow({
   samplesData,

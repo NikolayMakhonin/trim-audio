@@ -40,7 +40,7 @@ export const audioClient = new AudioClientPool(
 
 const ffmpegTransform = getFFmpegTransform(ffmpegTransformClient)
 
-describe('audio > test > trim-files', function () {
+xdescribe('audio > test > trim-files', function () {
   this.timeout(60000000)
 
   after(async () => {

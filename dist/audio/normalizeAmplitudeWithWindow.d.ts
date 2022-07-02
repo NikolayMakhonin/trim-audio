@@ -1,5 +1,5 @@
-import { WorkerData, WorkerFunctionServerResultSync } from '@flemist/worker-server';
-import { IAbortSignalFast } from '@flemist/abort-controller-fast';
+import type { WorkerData, WorkerFunctionServerResultSync } from '@flemist/worker-server';
+import type { IAbortSignalFast } from '@flemist/abort-controller-fast';
 export declare type NormalizeAmplitudeWithWindowArgs = {
     samplesData: Float32Array;
     channelsCount: number;

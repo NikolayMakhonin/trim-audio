@@ -68,6 +68,9 @@ describe('audio > normalizeAmplitudeSimple', function () {
   it('silence 0', async function () {
     await testVariants({
       useWorker    : [false, true],
+      x: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      // z: [0, 0,],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
