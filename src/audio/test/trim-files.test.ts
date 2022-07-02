@@ -3,10 +3,10 @@ import {trimAudioFile, trimAudioFilesFromDir} from './trim-files'
 import {getAssetPath} from './loadAsset'
 import {getTempFilePath} from './saveTempFile'
 import {FFmpegTransformClientPool, getFFmpegTransform} from '@flemist/ffmpeg-encode-decode'
-import {Pool, Pools} from '@flemist/time-limits'
+import {IPoolRunner, Pool, PoolRunner, Pools} from '@flemist/time-limits'
 import {AudioClientPool} from 'src/audio/AudioClientPool'
 
-const threadsPool = new Pool(6)
+const threadsPool = new Pool(7)
 
 export const ffmpegTransformClient = new FFmpegTransformClientPool(
   {
@@ -78,8 +78,9 @@ describe('audio > test > trim-files', function () {
     await trimAudioFilesFromDir(
       ffmpegTransform,
       audioClient,
+      new PoolRunner(new Pool(threadsPool.maxSize * 2)),
       {
-        inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech',
+        inputDir               : 'D:/RemoteData/Mega2/Backups/LearnWords/Cache/Speech',
         inputFilesRelativeGlobs: ['**/*.mp3'],
         outputDir              : 'E:/Temp/trim/speech',
       },

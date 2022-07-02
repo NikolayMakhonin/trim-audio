@@ -9,6 +9,7 @@ import {ffmpegDecode, ffmpegEncode, ffmpegEncodeMp3Params, FFmpegTransform} from
 // import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
 import {IAudioClient} from 'src/audio/AudioClient'
+import {IPoolRunner} from '@flemist/time-limits'
 // import {smoothAudio} from '../smoothAudio'
 
 // const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
@@ -163,6 +164,7 @@ export async function trimAudioFile(
 export async function trimAudioFiles(
   ffmpegTransform: FFmpegTransform,
   audioClient: IAudioClient,
+  runner: IPoolRunner,
   {
     inputFilesGlobs,
     getOutputFilePath,
@@ -176,7 +178,7 @@ export async function trimAudioFiles(
   }
   inputFilesPaths.sort()
 
-  await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
+  await Promise.all(inputFilesPaths.map((inputFilePath) => runner.run(1, async () => {
   // for (const inputFilePath of inputFilesPaths) {
     const outputFilePath = getOutputFilePath(inputFilePath)
 
@@ -200,7 +202,7 @@ export async function trimAudioFiles(
       throw err
     }
   // }
-  }))
+  })))
 
   console.log('Completed!')
 }
@@ -208,6 +210,7 @@ export async function trimAudioFiles(
 export function trimAudioFilesFromDir(
   ffmpegTransform: FFmpegTransform,
   audioClient: IAudioClient,
+  runner: IPoolRunner,
   {
     inputDir,
     inputFilesRelativeGlobs,
@@ -220,6 +223,7 @@ export function trimAudioFilesFromDir(
   return trimAudioFiles(
     ffmpegTransform,
     audioClient,
+    runner,
     {
       inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
       getOutputFilePath(filePath) {
