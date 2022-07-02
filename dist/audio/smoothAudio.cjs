@@ -33,23 +33,32 @@ function _smoothAudio({ samplesData, channelsCount, channel, startSamples, endSa
         }
     }
 }
-function smoothAudio({ samplesData, channelsCount, channels, startSamples, endSamples, }) {
+function smoothAudio(args) {
+    let { samplesData, channelsCount, channels, startSamples, endSamples, } = args;
     if (channels == null) {
         channels = audio_helpers.generateIndexArray(channelsCount);
     }
     const channelsLength = channels.length;
-    if (channelsLength === 0) {
-        return;
-    }
-    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-        _smoothAudio({
-            samplesData,
-            channelsCount,
-            channel: channels[nChannel],
-            startSamples,
-            endSamples,
-        });
+    if (channelsLength !== 0) {
+        for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+            _smoothAudio({
+                samplesData,
+                channelsCount,
+                channel: channels[nChannel],
+                startSamples,
+                endSamples,
+            });
+        }
     }
 }
+const _smoothAudioWorker = smoothAudio;
+const smoothAudioWorker = function smoothAudio(data, abortSignal) {
+    _smoothAudioWorker(data.data);
+    return {
+        data: data.data.samplesData,
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
 exports.smoothAudio = smoothAudio;
+exports.smoothAudioWorker = smoothAudioWorker;

@@ -59,22 +59,31 @@ function _normalizeOffsetWithWindow({ samplesData, channelsCount, channel, windo
     offset = offsetNext;
     _normalize(i + windowSamples);
 }
-function normalizeOffsetWithWindow({ samplesData, channelsCount, channels, windowSamples, }) {
+function normalizeOffsetWithWindow(args) {
+    let { samplesData, channelsCount, channels, windowSamples, } = args;
     if (channels == null) {
         channels = audio_helpers.generateIndexArray(channelsCount);
     }
     const channelsLength = channels.length;
-    if (channelsLength === 0) {
-        return;
-    }
-    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-        _normalizeOffsetWithWindow({
-            samplesData,
-            channelsCount,
-            channel: channels[nChannel],
-            windowSamples,
-        });
+    if (channelsLength !== 0) {
+        for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+            _normalizeOffsetWithWindow({
+                samplesData,
+                channelsCount,
+                channel: channels[nChannel],
+                windowSamples,
+            });
+        }
     }
 }
+const _normalizeOffsetWithWindowWorker = normalizeOffsetWithWindow;
+const normalizeOffsetWithWindowWorker = function normalizeOffsetWithWindow(data, abortSignal) {
+    _normalizeOffsetWithWindowWorker(data.data);
+    return {
+        data: data.data.samplesData,
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
 exports.normalizeOffsetWithWindow = normalizeOffsetWithWindow;
+exports.normalizeOffsetWithWindowWorker = normalizeOffsetWithWindowWorker;

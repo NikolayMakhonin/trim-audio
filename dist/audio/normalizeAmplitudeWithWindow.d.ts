@@ -1,4 +1,6 @@
-export declare function normalizeAmplitudeWithWindow({ samplesData, channelsCount, channels, separateChannels, coef, maxMult, windowSamples, }: {
+import { WorkerData, WorkerFunctionServerResultSync } from '@flemist/worker-server';
+import { IAbortSignalFast } from '@flemist/abort-controller-fast';
+export declare type NormalizeAmplitudeWithWindowArgs = {
     samplesData: Float32Array;
     channelsCount: number;
     channels?: number[];
@@ -6,4 +8,6 @@ export declare function normalizeAmplitudeWithWindow({ samplesData, channelsCoun
     coef: number;
     maxMult?: number;
     windowSamples: number;
-}): void;
+};
+export declare function normalizeAmplitudeWithWindow(args: NormalizeAmplitudeWithWindowArgs): void;
+export declare const normalizeAmplitudeWithWindowWorker: (data: WorkerData<NormalizeAmplitudeWithWindowArgs>, abortSignal?: IAbortSignalFast) => WorkerFunctionServerResultSync<Float32Array>;

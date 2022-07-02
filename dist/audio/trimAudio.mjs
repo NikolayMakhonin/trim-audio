@@ -1,8 +1,7 @@
 import { generateIndexArray, EPSILON } from './helpers.mjs';
 
-// max dispersion of normalized audio = 1
-// max decibel of normalized audio = 0
-function searchContent({ samplesData, channelsCount, samplesCount, channels, windowSamples, backward, minContentSamples, minContentDispersion, maxSilenceSamples, start, endExclusive, }) {
+function searchContent(args) {
+    let { samplesData, channelsCount, samplesCount, channels, windowSamples, backward, minContentSamples, minContentDispersion, maxSilenceSamples, start, endExclusive, } = args;
     if (windowSamples < 2) {
         throw new Error('windowSamples should be >= 2');
     }
@@ -74,7 +73,19 @@ function searchContent({ samplesData, channelsCount, samplesCount, channels, win
     }
     return contentStartIndex;
 }
-function trimAudio({ samplesData, channelsCount, channels, start, end, }) {
+const _searchContentWorker = searchContent;
+const searchContentWorker = function searchContent(data, abortSignal) {
+    const result = _searchContentWorker(data.data);
+    return {
+        data: {
+            samplesData: data.data.samplesData,
+            result,
+        },
+        transferList: [data.data.samplesData.buffer],
+    };
+};
+function trimAudio(args) {
+    const { samplesData, channelsCount, channels, start, end, } = args;
     const samplesCount = Math.floor(samplesData.length / channelsCount);
     let trimStart = !start ? 0 : searchContent({
         samplesData,
@@ -111,5 +122,16 @@ function trimAudio({ samplesData, channelsCount, channels, start, end, }) {
     }
     return new Float32Array(samplesData.buffer, trimStart * channelsCount * 4, (trimEndExclusive - trimStart) * channelsCount);
 }
+const _trimAudioWorker = trimAudio;
+const trimAudioWorker = function trimAudio(data, abortSignal) {
+    const result = _trimAudioWorker(data.data);
+    return {
+        data: {
+            samplesData: data.data.samplesData,
+            result,
+        },
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
-export { searchContent, trimAudio };
+export { searchContent, searchContentWorker, trimAudio, trimAudioWorker };

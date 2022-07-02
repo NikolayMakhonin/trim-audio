@@ -56,31 +56,40 @@ function _normalizeAmplitudeSimple({ samplesData, channelsCount, channels, coef,
         });
     }
 }
-function normalizeAmplitudeSimple({ samplesData, channelsCount, channels, separateChannels, coef, }) {
+function normalizeAmplitudeSimple(args) {
+    let { samplesData, channelsCount, channels, separateChannels, coef, } = args;
     if (channels == null) {
         channels = generateIndexArray(channelsCount);
     }
     const channelsLength = channels.length;
-    if (channelsLength === 0) {
-        return;
-    }
-    if (separateChannels) {
-        for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+    if (channelsLength !== 0) {
+        if (separateChannels) {
+            for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+                _normalizeAmplitudeSimple({
+                    samplesData,
+                    channelsCount,
+                    channels: [channels[nChannel]],
+                    coef,
+                });
+            }
+        }
+        else {
             _normalizeAmplitudeSimple({
                 samplesData,
                 channelsCount,
-                channels: [channels[nChannel]],
+                channels,
                 coef,
             });
         }
-        return;
     }
-    _normalizeAmplitudeSimple({
-        samplesData,
-        channelsCount,
-        channels,
-        coef,
-    });
 }
+const _normalizeAmplitudeSimpleWorker = normalizeAmplitudeSimple;
+const normalizeAmplitudeSimpleWorker = function normalizeAmplitudeSimple(data, abortSignal) {
+    _normalizeAmplitudeSimpleWorker(data.data);
+    return {
+        data: data.data.samplesData,
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
-export { normalizeAmplitudeSimple };
+export { normalizeAmplitudeSimple, normalizeAmplitudeSimpleWorker };

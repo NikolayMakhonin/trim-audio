@@ -77,35 +77,44 @@ function _normalizeAmplitudeWithWindow({ samplesData, channelsCount, channels, c
     maxNext = 0;
     _normalize(i + windowSamples);
 }
-function normalizeAmplitudeWithWindow({ samplesData, channelsCount, channels, separateChannels, coef, maxMult, windowSamples, }) {
+function normalizeAmplitudeWithWindow(args) {
+    let { samplesData, channelsCount, channels, separateChannels, coef, maxMult, windowSamples, } = args;
     if (channels == null) {
         channels = generateIndexArray(channelsCount);
     }
     const channelsLength = channels.length;
-    if (channelsLength === 0) {
-        return;
-    }
-    if (separateChannels) {
-        for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+    if (channelsLength !== 0) {
+        if (separateChannels) {
+            for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+                _normalizeAmplitudeWithWindow({
+                    samplesData,
+                    channelsCount,
+                    channels: [channels[nChannel]],
+                    coef,
+                    maxMult,
+                    windowSamples,
+                });
+            }
+        }
+        else {
             _normalizeAmplitudeWithWindow({
                 samplesData,
                 channelsCount,
-                channels: [channels[nChannel]],
+                channels,
                 coef,
                 maxMult,
                 windowSamples,
             });
         }
-        return;
     }
-    _normalizeAmplitudeWithWindow({
-        samplesData,
-        channelsCount,
-        channels,
-        coef,
-        maxMult,
-        windowSamples,
-    });
 }
+const _normalizeAmplitudeWithWindowWorker = normalizeAmplitudeWithWindow;
+const normalizeAmplitudeWithWindowWorker = function normalizeAmplitudeWithWindow(data, abortSignal) {
+    _normalizeAmplitudeWithWindowWorker(data.data);
+    return {
+        data: data.data.samplesData,
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
-export { normalizeAmplitudeWithWindow };
+export { normalizeAmplitudeWithWindow, normalizeAmplitudeWithWindowWorker };

@@ -1,4 +1,6 @@
-export declare function searchContent({ samplesData, channelsCount, samplesCount, channels, windowSamples, backward, minContentSamples, minContentDispersion, maxSilenceSamples, start, endExclusive, }: {
+import { WorkerData, WorkerFunctionServerResultSync } from '@flemist/worker-server';
+import { IAbortSignalFast } from '@flemist/abort-controller-fast';
+export declare type SearchContentArgs = {
     samplesData: Float32Array;
     channelsCount: number;
     samplesCount: number;
@@ -10,8 +12,14 @@ export declare function searchContent({ samplesData, channelsCount, samplesCount
     maxSilenceSamples: number;
     start?: number;
     endExclusive?: number;
-}): number;
-export declare function trimAudio({ samplesData, channelsCount, channels, start, end, }: {
+};
+export declare function searchContent(args: SearchContentArgs): number;
+export declare type SearchContentResult = {
+    samplesData: Float32Array;
+    result: number;
+};
+export declare const searchContentWorker: (data: WorkerData<SearchContentArgs>, abortSignal?: IAbortSignalFast) => WorkerFunctionServerResultSync<SearchContentResult>;
+export declare type TrimAudioArgs = {
     samplesData: Float32Array;
     channelsCount: number;
     channels?: number[];
@@ -29,4 +37,10 @@ export declare function trimAudio({ samplesData, channelsCount, channels, start,
         maxSilenceSamples: number;
         space: number;
     };
-}): Float32Array;
+};
+export declare function trimAudio(args: TrimAudioArgs): Float32Array;
+export declare type TrimAudioResult = {
+    samplesData: Float32Array;
+    result: Float32Array;
+};
+export declare const trimAudioWorker: (data: WorkerData<TrimAudioArgs>, abortSignal?: IAbortSignalFast) => WorkerFunctionServerResultSync<TrimAudioResult>;

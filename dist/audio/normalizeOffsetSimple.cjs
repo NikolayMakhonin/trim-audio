@@ -35,21 +35,30 @@ function _normalizeOffsetSimple({ samplesData, channelsCount, channel, }) {
         offset: -offset,
     });
 }
-function normalizeOffsetSimple({ samplesData, channelsCount, channels, }) {
+function normalizeOffsetSimple(args) {
+    let { samplesData, channelsCount, channels, } = args;
     if (channels == null) {
         channels = audio_helpers.generateIndexArray(channelsCount);
     }
     const channelsLength = channels.length;
-    if (channelsLength === 0) {
-        return;
-    }
-    for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
-        _normalizeOffsetSimple({
-            samplesData,
-            channelsCount,
-            channel: channels[nChannel],
-        });
+    if (channelsLength !== 0) {
+        for (let nChannel = 0; nChannel < channelsLength; nChannel++) {
+            _normalizeOffsetSimple({
+                samplesData,
+                channelsCount,
+                channel: channels[nChannel],
+            });
+        }
     }
 }
+const _normalizeOffsetSimpleWorker = normalizeOffsetSimple;
+const normalizeOffsetSimpleWorker = function normalizeOffsetSimple(data, abortSignal) {
+    _normalizeOffsetSimpleWorker(data.data);
+    return {
+        data: data.data.samplesData,
+        transferList: [data.data.samplesData.buffer],
+    };
+};
 
 exports.normalizeOffsetSimple = normalizeOffsetSimple;
+exports.normalizeOffsetSimpleWorker = normalizeOffsetSimpleWorker;

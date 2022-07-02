@@ -1,5 +1,1 @@
-export declare type AudioSamples = {
-    data: Float32Array;
-    channels: number;
-    sampleRate: number;
-};
+export type { AudioSamples } from '@flemist/ffmpeg-encode-decode';
