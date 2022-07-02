@@ -1,8 +1,6 @@
 import {checkIsNumber, generateIndexArray} from './helpers'
 import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
-import {normalizeOffsetSimple} from "~/src";
-import {NormalizeOffsetSimpleArgs} from "src/audio/normalizeOffsetSimple";
 
 function _normalizeOffsetWithWindow({
   samplesData,

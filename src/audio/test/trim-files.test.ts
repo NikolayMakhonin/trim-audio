@@ -2,11 +2,30 @@
 import {trimAudioFile, trimAudioFilesFromDir} from './trim-files'
 import {getAssetPath} from './loadAsset'
 import {getTempFilePath} from './saveTempFile'
-import {FFmpegTransformClientMT, getFFmpegTransform} from '@flemist/ffmpeg-encode-decode'
+import {FFmpegTransformClientPool, getFFmpegTransform} from '@flemist/ffmpeg-encode-decode'
+import {Pool, Pools} from '@flemist/time-limits'
+import {AudioClientPool} from 'src/audio/AudioClientPool'
 
-export const ffmpegTransformClient = new FFmpegTransformClientMT(
+const threadsPool = new Pool(6)
+
+export const ffmpegTransformClient = new FFmpegTransformClientPool(
   {
-    threads: 3,
+    threadsPool: new Pools(threadsPool, new Pool(3)),
+    preInit    : false,
+    options    : {
+      preload : false,
+      loglevel: 'warning',
+      // log     : false,
+      // logger({data: {threadId, type, message}}) {
+      // 	console.log(`[${threadId}] [${type}] ${message}`)
+      // },
+    },
+  },
+)
+
+export const audioClient = new AudioClientPool(
+  {
+    threadsPool,
     preInit: false,
     options: {
       preload : false,
@@ -25,12 +44,16 @@ describe('audio > test > trim-files', function () {
   this.timeout(60000000)
 
   after(async () => {
-    await ffmpegTransformClient.terminate()
+    await Promise.all([
+      ffmpegTransformClient.terminate(),
+      audioClient.terminate(),
+    ])
   })
 
   it('file', async function () {
     await trimAudioFile(
       ffmpegTransform,
+      audioClient,
       {
         inputFilePath : getAssetPath('vi_ten.mp3'),
         outputFilePath: getTempFilePath('vi_ten.mp3'),
@@ -51,9 +74,10 @@ describe('audio > test > trim-files', function () {
     // })
   })
 
-  xit('files', async function () {
+  it('files', async function () {
     await trimAudioFilesFromDir(
       ffmpegTransform,
+      audioClient,
       {
         inputDir               : 'I:/Work/_GIT/GitLab/Develop/dot.Net/MyProjects/LearnWords/Old/LearnWordsSimple/bin/Debug/Cache/Speech',
         inputFilesRelativeGlobs: ['**/*.mp3'],

@@ -4,11 +4,12 @@ import path from 'path'
 import {getAssetData} from './loadAsset'
 import {AudioSamples} from '../contracts'
 import {ffmpegDecode, ffmpegEncode, ffmpegEncodeMp3Params, FFmpegTransform} from '@flemist/ffmpeg-encode-decode'
-import {normalizeOffsetWithWindow} from '../normalizeOffsetWithWindow'
-import {normalizeAmplitudeSimple} from '../normalizeAmplitudeSimple'
-import {trimAudio} from '../trimAudio'
+// import {normalizeOffsetWithWindow} from '../normalizeOffsetWithWindow'
+// import {normalizeAmplitudeSimple} from '../normalizeAmplitudeSimple'
+// import {trimAudio} from '../trimAudio'
 import {decibelToDispersion} from '../helpers'
-import {smoothAudio} from '../smoothAudio'
+import {IAudioClient} from 'src/audio/AudioClient'
+// import {smoothAudio} from '../smoothAudio'
 
 // const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
 // const SILENCE_DECIBEL_END_DEFAULT = -40.5
@@ -67,13 +68,15 @@ async function saveToMp3File(
 
 export async function trimAudioFile(
   ffmpegTransform,
+  audioClient: IAudioClient,
   {
     inputFilePath,
     outputFilePath,
   }: {
-  inputFilePath: string,
-  outputFilePath: string,
-}) {
+    inputFilePath: string,
+    outputFilePath: string,
+  },
+) {
   inputFilePath = path.resolve(inputFilePath)
   outputFilePath = path.resolve(outputFilePath)
 
@@ -87,7 +90,7 @@ export async function trimAudioFile(
     await fse.unlink(outputFilePath)
   }
 
-  normalizeOffsetWithWindow({
+  audioClient.normalizeOffsetWithWindow({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
@@ -95,14 +98,14 @@ export async function trimAudioFile(
 
   const normalizeCoef = 0.95
 
-  normalizeAmplitudeSimple({
+  audioClient.normalizeAmplitudeSimple({
     samplesData     : samples.data,
     channelsCount   : samples.channels,
     coef            : normalizeCoef,
     separateChannels: true,
   })
 
-  trimAudio({
+  audioClient.trimAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     start        : {
@@ -121,14 +124,14 @@ export async function trimAudioFile(
     },
   })
 
-  // normalizeAmplitudeSimple({
+  // audioClient.normalizeAmplitudeSimple({
   //   samplesData     : samples.data,
   //   channelsCount   : samples.channels,
   //   coef            : 0.9,
   //   separateChannels: true,
   // })
 
-  // normalizeAmplitudeWithWindow({
+  // audioClient.normalizeAmplitudeWithWindow({
   //   samplesData     : samples.data,
   //   channelsCount   : samples.channels,
   //   coef            : 0.9,
@@ -143,7 +146,7 @@ export async function trimAudioFile(
   //   sampleRate: 44100,
   // }
 
-  smoothAudio({
+  audioClient.smoothAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     startSamples : samples.sampleRate * 20 / 1000,
@@ -159,6 +162,7 @@ export async function trimAudioFile(
 
 export async function trimAudioFiles(
   ffmpegTransform: FFmpegTransform,
+  audioClient: IAudioClient,
   {
     inputFilesGlobs,
     getOutputFilePath,
@@ -172,17 +176,19 @@ export async function trimAudioFiles(
   }
   inputFilesPaths.sort()
 
-  // await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
-  for (const inputFilePath of inputFilesPaths) {
+  await Promise.all(inputFilesPaths.map(async (inputFilePath) => {
+  // for (const inputFilePath of inputFilesPaths) {
     const outputFilePath = getOutputFilePath(inputFilePath)
 
     if (fse.existsSync(outputFilePath)) {
-      continue
+      return
+      // continue
     }
 
     try {
       await trimAudioFile(
         ffmpegTransform,
+        audioClient,
         {
           inputFilePath,
           outputFilePath,
@@ -193,14 +199,15 @@ export async function trimAudioFiles(
       console.log('ERROR: ' + inputFilePath + '\r\n' + (err.stack || err.message || err))
       throw err
     }
-  }
-  // }))
+  // }
+  }))
 
   console.log('Completed!')
 }
 
 export function trimAudioFilesFromDir(
   ffmpegTransform: FFmpegTransform,
+  audioClient: IAudioClient,
   {
     inputDir,
     inputFilesRelativeGlobs,
@@ -212,6 +219,7 @@ export function trimAudioFilesFromDir(
 }) {
   return trimAudioFiles(
     ffmpegTransform,
+    audioClient,
     {
       inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
       getOutputFilePath(filePath) {

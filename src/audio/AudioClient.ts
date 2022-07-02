@@ -1,9 +1,10 @@
 import {
   IWorkerEventBus,
-  WorkerClient, WorkerClientMT,
   WorkerData,
   workerFunctionClient,
   WorkerFunctionClient,
+  WorkerClient,
+  IWorkerClient,
 } from '@flemist/worker-server'
 import {NormalizeAmplitudeSimpleArgs} from 'src/audio/normalizeAmplitudeSimple'
 import {SearchContentArgs, SearchContentResult, TrimAudioArgs} from 'src/audio/trimAudio'
@@ -15,7 +16,17 @@ import {audioWorkerPath} from './paths.cjs'
 
 export type TAudioClientOptions = {}
 
-export class AudioClient extends WorkerClient<TAudioClientOptions> {
+export interface IAudioClient extends IWorkerClient {
+  normalizeAmplitudeSimple(args: NormalizeAmplitudeSimpleArgs): Promise<WorkerData<Float32Array>>;
+  normalizeAmplitudeWithWindow(args: NormalizeAmplitudeWithWindowArgs): Promise<WorkerData<Float32Array>>;
+  normalizeOffsetSimple(args: NormalizeOffsetSimpleArgs): Promise<WorkerData<Float32Array>>;
+  normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs): Promise<WorkerData<Float32Array>>;
+  smoothAudio(args: SmoothAudioArgs): Promise<WorkerData<Float32Array>>;
+  searchContent(args: SearchContentArgs): Promise<WorkerData<SearchContentResult>>;
+  trimAudio(args: TrimAudioArgs): Promise<WorkerData<Float32Array>>;
+}
+
+export class AudioClient extends WorkerClient<TAudioClientOptions> implements IAudioClient {
   private _normalizeAmplitudeSimple: WorkerFunctionClient<NormalizeAmplitudeSimpleArgs, Float32Array, void>
   private _normalizeAmplitudeWithWindow: WorkerFunctionClient<NormalizeAmplitudeWithWindowArgs, Float32Array, void>
   private _normalizeOffsetSimple: WorkerFunctionClient<NormalizeOffsetSimpleArgs, Float32Array, void>
@@ -140,72 +151,5 @@ export class AudioClient extends WorkerClient<TAudioClientOptions> {
     this._smoothAudio = null
     this._searchContent = null
     this._trimAudio = null
-  }
-}
-
-export class AudioClientMT extends WorkerClientMT<TAudioClientOptions, AudioClient> {
-  constructor({
-    threads,
-    preInit,
-    options,
-  }: {
-    threads: number;
-    preInit: boolean;
-    options: TAudioClientOptions;
-  }) {
-    super({
-      threads,
-      createClient() {
-        return new AudioClient({
-          preInit,
-          options,
-        })
-      },
-      preInit,
-      options,
-    })
-  }
-
-
-  async normalizeAmplitudeSimple(args: NormalizeAmplitudeSimpleArgs) {
-    return this.use((client) => {
-      return client.normalizeAmplitudeSimple(args)
-    })
-  }
-
-  async normalizeAmplitudeWithWindow(args: NormalizeAmplitudeWithWindowArgs) {
-    return this.use((client) => {
-      return client.normalizeAmplitudeWithWindow(args)
-    })
-  }
-
-  async normalizeOffsetSimple(args: NormalizeOffsetSimpleArgs) {
-    return this.use((client) => {
-      return client.normalizeOffsetSimple(args)
-    })
-  }
-
-  async normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs) {
-    return this.use((client) => {
-      return client.normalizeOffsetWithWindow(args)
-    })
-  }
-
-  async smoothAudio(args: SmoothAudioArgs) {
-    return this.use((client) => {
-      return client.smoothAudio(args)
-    })
-  }
-
-  async searchContent(args: SearchContentArgs) {
-    return this.use((client) => {
-      return client.searchContent(args)
-    })
-  }
-
-  async trimAudio(args: TrimAudioArgs) {
-    return this.use((client) => {
-      return client.trimAudio(args)
-    })
   }
 }

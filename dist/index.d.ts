@@ -1,1 +1,1 @@
-export declare function test1(): void;
+export * from './audio';
