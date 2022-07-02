@@ -9,6 +9,10 @@ import {audioClient} from 'src/audio/test/audioClient'
 describe('audio > normalizeOffsetSimple', function () {
   this.timeout(30000)
 
+  after(async () => {
+    audioClient.terminate()
+  })
+
   const testVariants = createTestVariants(({
     useWorker,
     samplesCount,

@@ -74,7 +74,7 @@ describe('audio > test > trim-files', function () {
     // })
   })
 
-  it('files', async function () {
+  xit('files', async function () {
     await trimAudioFilesFromDir(
       ffmpegTransform,
       audioClient,
