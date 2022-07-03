@@ -1,6 +1,6 @@
 import { IWorkerEventBus, WorkerData, WorkerClient, IWorkerClient } from '@flemist/worker-server';
 import { NormalizeAmplitudeSimpleArgs } from "./normalizeAmplitudeSimple";
-import { SearchContentArgs, SearchContentResult, TrimAudioArgs } from "./trimAudio";
+import { SearchContentArgs, SearchContentResult, TrimAudioArgs, TrimAudioResult } from "./trimAudio";
 import { SmoothAudioArgs } from "./smoothAudio";
 import { NormalizeOffsetWithWindowArgs } from "./normalizeOffsetWithWindow";
 import { NormalizeOffsetSimpleArgs } from "./normalizeOffsetSimple";
@@ -13,7 +13,7 @@ export interface IAudioClient extends IWorkerClient {
     normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs): Promise<WorkerData<Float32Array>>;
     smoothAudio(args: SmoothAudioArgs): Promise<WorkerData<Float32Array>>;
     searchContent(args: SearchContentArgs): Promise<WorkerData<SearchContentResult>>;
-    trimAudio(args: TrimAudioArgs): Promise<WorkerData<Float32Array>>;
+    trimAudio(args: TrimAudioArgs): Promise<WorkerData<TrimAudioResult>>;
 }
 export declare class AudioClient extends WorkerClient<TAudioClientOptions> implements IAudioClient {
     private _normalizeAmplitudeSimple;
@@ -34,6 +34,6 @@ export declare class AudioClient extends WorkerClient<TAudioClientOptions> imple
     normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs): Promise<WorkerData<Float32Array>>;
     smoothAudio(args: SmoothAudioArgs): Promise<WorkerData<Float32Array>>;
     searchContent(args: SearchContentArgs): Promise<WorkerData<SearchContentResult>>;
-    trimAudio(args: TrimAudioArgs): Promise<WorkerData<Float32Array>>;
+    trimAudio(args: TrimAudioArgs): Promise<WorkerData<TrimAudioResult>>;
     protected _terminate(): Promise<void> | void;
 }

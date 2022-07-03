@@ -1,6 +1,7 @@
 import {correctSample, generateIndexArray} from './helpers'
 import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {Priority} from '@flemist/priority-queue'
 
 function getOffset({
   samplesData,
@@ -68,6 +69,8 @@ export type NormalizeOffsetSimpleArgs = {
   samplesData: Float32Array,
   channelsCount: number,
   channels?: number[],
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
 }
 
 export function normalizeOffsetSimple(

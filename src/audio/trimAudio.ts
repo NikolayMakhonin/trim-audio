@@ -1,6 +1,7 @@
 import {EPSILON, generateIndexArray} from './helpers'
 import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {Priority} from '@flemist/priority-queue'
 
 // max dispersion of normalized audio = 1
 // max decibel of normalized audio = 0
@@ -16,6 +17,8 @@ export type SearchContentArgs = {
   maxSilenceSamples: number,
   start?: number,
   endExclusive?: number,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
 }
 
 export function searchContent(
@@ -159,6 +162,8 @@ export type TrimAudioArgs = {
     maxSilenceSamples: number,
     space: number,
   },
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
 }
 
 export function trimAudio(

@@ -1,5 +1,6 @@
 import { WorkerData, WorkerFunctionServerResultSync } from '@flemist/worker-server';
 import { IAbortSignalFast } from '@flemist/abort-controller-fast';
+import { Priority } from '@flemist/priority-queue';
 export declare type SearchContentArgs = {
     samplesData: Float32Array;
     channelsCount: number;
@@ -12,6 +13,8 @@ export declare type SearchContentArgs = {
     maxSilenceSamples: number;
     start?: number;
     endExclusive?: number;
+    priority?: Priority;
+    abortSignal?: IAbortSignalFast;
 };
 export declare function searchContent(args: SearchContentArgs): number;
 export declare type SearchContentResult = {
@@ -37,6 +40,8 @@ export declare type TrimAudioArgs = {
         maxSilenceSamples: number;
         space: number;
     };
+    priority?: Priority;
+    abortSignal?: IAbortSignalFast;
 };
 export declare function trimAudio(args: TrimAudioArgs): Float32Array;
 export declare type TrimAudioResult = {

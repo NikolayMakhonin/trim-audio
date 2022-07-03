@@ -85,7 +85,7 @@
   },
   "dependencies": {
     "@flemist/abort-controller-fast": "^0.0.5",
-    "@flemist/ffmpeg-encode-decode": "^0.0.14",
+    "@flemist/ffmpeg-encode-decode": "^0.0.15",
     "@flemist/ffmpeg.wasm-core-st": "^0.10.2",
     "@flemist/priority-queue": "^0.0.8",
     "@flemist/time-limits": "^0.0.4",

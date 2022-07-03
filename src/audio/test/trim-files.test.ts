@@ -6,7 +6,7 @@ import {FFmpegTransformClientPool, getFFmpegTransform} from '@flemist/ffmpeg-enc
 import {Pool, PoolRunner, Pools} from '@flemist/time-limits'
 import {AudioClientPool} from 'src/audio/AudioClientPool'
 
-const threadsPool = new Pool(7)
+const threadsPool = new Pool(10)
 
 export const ffmpegTransformClient = new FFmpegTransformClientPool(
   {
@@ -43,15 +43,13 @@ describe('audio > test > trim-files', function () {
   })
 
   it('file', async function () {
-    await trimAudioFile(
-      false,
+    await trimAudioFile({
+      useWorker     : false,
       ffmpegTransform,
       audioClient,
-      {
-        inputFilePath : getAssetPath('vi_ten.mp3'),
-        outputFilePath: getTempFilePath('vi_ten.mp3'),
-      },
-    )
+      inputFilePath : getAssetPath('vi_ten.mp3'),
+      outputFilePath: getTempFilePath('vi_ten.mp3'),
+    })
 
     console.log('SUCCESS')
 
@@ -69,17 +67,15 @@ describe('audio > test > trim-files', function () {
     // })
   })
 
-  it('files', async function () {
-    await trimAudioFilesFromDir(
-      false,
+  xit('files', async function () {
+    await trimAudioFilesFromDir({
+      useWorker              : false,
       ffmpegTransform,
       audioClient,
-      new PoolRunner(new Pool(threadsPool.maxSize * 2)),
-      {
-        inputDir               : 'D:/RemoteData/Mega2/Backups/LearnWords/Cache/Speech',
-        inputFilesRelativeGlobs: ['**/*.mp3'],
-        outputDir              : 'E:/Temp/trim/speech',
-      },
-    )
+      runner                 : new PoolRunner(new Pool(threadsPool.maxSize * 5)),
+      inputDir               : 'D:/RemoteData/Mega2/Backups/LearnWords/Cache/Speech',
+      inputFilesRelativeGlobs: ['**/*.mp3'],
+      outputDir              : 'E:/Temp/trim/speech',
+    })
   })
 })

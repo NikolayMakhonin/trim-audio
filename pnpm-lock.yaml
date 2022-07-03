@@ -4,7 +4,7 @@ specifiers:
   '@flemist/abort-controller-fast': ^0.0.5
   '@flemist/async-utils': ^0.0.11
   '@flemist/copy-glob-flat': 0.0.5
-  '@flemist/ffmpeg-encode-decode': ^0.0.14
+  '@flemist/ffmpeg-encode-decode': ^0.0.15
   '@flemist/ffmpeg.wasm-core-st': ^0.10.2
   '@flemist/priority-queue': ^0.0.8
   '@flemist/test-utils': 0.0.9
@@ -47,7 +47,7 @@ specifiers:
 
 dependencies:
   '@flemist/abort-controller-fast': 0.0.5
-  '@flemist/ffmpeg-encode-decode': 0.0.14
+  '@flemist/ffmpeg-encode-decode': 0.0.15
   '@flemist/ffmpeg.wasm-core-st': 0.10.2
   '@flemist/priority-queue': 0.0.8
   '@flemist/time-limits': 0.0.4
@@ -339,12 +339,13 @@ packages:
       tslib: 2.4.0
     dev: true
 
-  /@flemist/ffmpeg-encode-decode/0.0.14:
-    resolution: {integrity: sha512-1ZOJ6EMnpalKs2GSXwQ/9WtEwm/1xz0UZj+cFW7vjmZK4t9qeAMWwd8gdlisuche8TOSO0vwimLxt/1Mmej9lA==}
+  /@flemist/ffmpeg-encode-decode/0.0.15:
+    resolution: {integrity: sha512-2vmzVsXfL5yhG3zGRw5NouqvSljXF+HpgVXlbV2zSfh2Epv4HXAiZrlB3RWKSkYkbX1aObKM4MxSKOYipOwynA==}
     engines: {node: '>=14.17.6', pnpm: ^7.1.6}
     dependencies:
       '@flemist/abort-controller-fast': 0.0.5
       '@flemist/ffmpeg.wasm-st': 0.10.1
+      '@flemist/priority-queue': 0.0.8
       '@flemist/time-limits': 0.0.4
       '@flemist/worker-server': 0.0.11
       tslib: 2.4.0

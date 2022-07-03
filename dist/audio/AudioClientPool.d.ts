@@ -19,5 +19,5 @@ export declare class AudioClientPool extends WorkerClientPool<AudioClient> imple
     normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs): Promise<import("@flemist/worker-server").WorkerData<Float32Array>>;
     smoothAudio(args: SmoothAudioArgs): Promise<import("@flemist/worker-server").WorkerData<Float32Array>>;
     searchContent(args: SearchContentArgs): Promise<import("@flemist/worker-server").WorkerData<import("./trimAudio").SearchContentResult>>;
-    trimAudio(args: TrimAudioArgs): Promise<import("@flemist/worker-server").WorkerData<Float32Array>>;
+    trimAudio(args: TrimAudioArgs): Promise<import("@flemist/worker-server").WorkerData<import("./trimAudio").TrimAudioResult>>;
 }

@@ -35,42 +35,42 @@ export class AudioClientPool
   async normalizeAmplitudeSimple(args: NormalizeAmplitudeSimpleArgs) {
     return this.use(1, ([client]) => {
       return client.normalizeAmplitudeSimple(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async normalizeAmplitudeWithWindow(args: NormalizeAmplitudeWithWindowArgs) {
     return this.use(1, ([client]) => {
       return client.normalizeAmplitudeWithWindow(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async normalizeOffsetSimple(args: NormalizeOffsetSimpleArgs) {
     return this.use(1, ([client]) => {
       return client.normalizeOffsetSimple(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs) {
     return this.use(1, ([client]) => {
       return client.normalizeOffsetWithWindow(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async smoothAudio(args: SmoothAudioArgs) {
     return this.use(1, ([client]) => {
       return client.smoothAudio(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async searchContent(args: SearchContentArgs) {
     return this.use(1, ([client]) => {
       return client.searchContent(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 
   async trimAudio(args: TrimAudioArgs) {
     return this.use(1, ([client]) => {
       return client.trimAudio(args)
-    })
+    }, args.priority, args.abortSignal)
   }
 }

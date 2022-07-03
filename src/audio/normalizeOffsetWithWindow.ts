@@ -1,6 +1,7 @@
 import {checkIsNumber, generateIndexArray} from './helpers'
 import {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {Priority} from '@flemist/priority-queue'
 
 function _normalizeOffsetWithWindow({
   samplesData,
@@ -78,6 +79,8 @@ export type NormalizeOffsetWithWindowArgs = {
   channelsCount: number,
   channels?: number[],
   windowSamples: number,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
 }
 
 export function normalizeOffsetWithWindow(

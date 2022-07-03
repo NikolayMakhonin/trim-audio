@@ -3,7 +3,12 @@ import globby from 'globby'
 import path from 'path'
 import {getAssetData} from './loadAsset'
 import {AudioSamples} from '../contracts'
-import {ffmpegDecode, ffmpegEncode, ffmpegEncodeMp3Params, FFmpegTransform} from '@flemist/ffmpeg-encode-decode'
+import {
+  ffmpegDecode,
+  ffmpegEncode,
+  ffmpegEncodeMp3Params,
+  FFmpegTransform,
+} from '@flemist/ffmpeg-encode-decode'
 // import {normalizeOffsetWithWindow} from '../normalizeOffsetWithWindow'
 // import {normalizeAmplitudeSimple} from '../normalizeAmplitudeSimple'
 // import {trimAudio} from '../trimAudio'
@@ -11,6 +16,8 @@ import {decibelToDispersion} from '../helpers'
 import {IAudioClient} from 'src/audio/AudioClient'
 import {IPoolRunner} from '@flemist/time-limits'
 import {normalizeAmplitudeSimple, normalizeOffsetWithWindow, smoothAudio, trimAudio} from '~/src'
+import {Priority, priorityCreate} from '@flemist/priority-queue'
+import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 // import {smoothAudio} from '../smoothAudio'
 
 // const SILENCE_DECIBEL_START_DEFAULT = -22.5 // use -30.5 for 'ф..'
@@ -28,34 +35,53 @@ const END_SPACE_DEFAULT = 100
 const END_MAX_SILENCE_DEFAULT = 350
 const END_MIN_CONTENT_DEFAULT = 200
 
-async function readAudioFile(
+async function readAudioFile({
+  ffmpegTransform,
+  filePath,
+  priority,
+  abortSignal,
+}: {
   ffmpegTransform: FFmpegTransform,
   filePath: string,
-): Promise<AudioSamples> {
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
+}): Promise<AudioSamples> {
   const data = await getAssetData(filePath)
 
-  const samples: AudioSamples = await ffmpegDecode(
+  const samples = await ffmpegDecode({
     ffmpegTransform,
-    data, {
+    inputData: data,
+    decode   : {
       channels  : 1,
       sampleRate: 44100,
-    })
+    },
+    priority,
+    abortSignal,
+  })
 
   return samples
 }
 
-async function saveToMp3File(
+async function saveToMp3File({
+  ffmpegTransform,
+  filePath,
+  samples,
+  priority,
+  abortSignal,
+}: {
   ffmpegTransform: FFmpegTransform,
   filePath,
   samples: AudioSamples,
-) {
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
+}) {
   // if (samples.data.length < 256) {
   //   throw new Error('samples.data.length === ' + samples.data.length)
   // }
-  const data: Uint8Array = await ffmpegEncode(
+  const data = await ffmpegEncode({
     ffmpegTransform,
     samples,
-    {
+    encode: {
       outputFormat: 'mp3', // same as file extension
       // docs: http://ffmpeg.org/ffmpeg-codecs.html#libmp3lame
       params      : ffmpegEncodeMp3Params({
@@ -63,27 +89,43 @@ async function saveToMp3File(
         vbrQuality : 8,
         jointStereo: true,
       }),
-    })
+    },
+    priority,
+    abortSignal,
+  })
 
   await fse.writeFile(filePath, data)
 }
 
-export async function trimAudioFile(
-  useWorker: boolean,
+export async function trimAudioFile({
+  useWorker,
   ffmpegTransform,
+  audioClient,
+  inputFilePath,
+  outputFilePath,
+  priority,
+  abortSignal,
+}: {
+  useWorker: boolean,
+  ffmpegTransform: FFmpegTransform,
   audioClient: IAudioClient,
-  {
-    inputFilePath,
-    outputFilePath,
-  }: {
-    inputFilePath: string,
-    outputFilePath: string,
-  },
-) {
+  inputFilePath: string,
+  outputFilePath: string,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
+}) {
   inputFilePath = path.resolve(inputFilePath)
   outputFilePath = path.resolve(outputFilePath)
 
-  const samples = await readAudioFile(ffmpegTransform, inputFilePath)
+  const filePriority = priorityCreate(1, priority)
+  const transformPriority = priorityCreate(2, priority)
+
+  const samples = await readAudioFile({
+    ffmpegTransform,
+    filePath: inputFilePath,
+    priority: priorityCreate(-1, filePriority),
+    abortSignal,
+  })
 
   // const samples: AudioSamples = {
   //   data      : new Float32Array(16000),
@@ -104,6 +146,8 @@ export async function trimAudioFile(
       samplesData  : samples.data,
       channelsCount: samples.channels,
       windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
+      priority     : priorityCreate(-1, transformPriority),
+      abortSignal,
     })).data
   }
   else {
@@ -122,6 +166,8 @@ export async function trimAudioFile(
       channelsCount   : samples.channels,
       coef            : normalizeCoef,
       separateChannels: true,
+      priority        : priorityCreate(-2, transformPriority),
+      abortSignal,
     })).data
   }
   else {
@@ -151,6 +197,8 @@ export async function trimAudioFile(
         minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(END_DECIBEL_DEFAULT),
         space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
       },
+      priority: priorityCreate(-3, transformPriority),
+      abortSignal,
     })).data.result
   }
   else {
@@ -196,6 +244,8 @@ export async function trimAudioFile(
       channelsCount: samples.channels,
       startSamples : samples.sampleRate * 20 / 1000,
       endSamples   : samples.sampleRate * 50 / 1000,
+      priority     : priorityCreate(-4, transformPriority),
+      abortSignal,
     })).data
   }
   else {
@@ -207,34 +257,42 @@ export async function trimAudioFile(
     })
   }
 
-  await saveToMp3File(
+  await saveToMp3File({
     ffmpegTransform,
-    outputFilePath,
+    filePath: outputFilePath,
     samples,
-  )
+    priority: priorityCreate(-2, filePriority),
+    abortSignal,
+  })
 }
 
-export async function trimAudioFiles(
+export async function trimAudioFiles({
+  useWorker,
+  ffmpegTransform,
+  audioClient,
+  runner,
+  inputFilesGlobs,
+  getOutputFilePath,
+  priority,
+  abortSignal,
+}: {
   useWorker: boolean,
   ffmpegTransform: FFmpegTransform,
   audioClient: IAudioClient,
   runner: IPoolRunner,
-  {
-    inputFilesGlobs,
-    getOutputFilePath,
-  }: {
-    inputFilesGlobs: string[],
-    getOutputFilePath: (inputFilePath: string) => string,
-  },
-) {
+  inputFilesGlobs: string[],
+  getOutputFilePath: (inputFilePath: string) => string,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
+}) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
   if (inputFilesPaths.length === 0) {
     throw new Error(`There is no files:\r\n${inputFilesGlobs.join('\r\n')}`)
   }
   inputFilesPaths.sort()
 
-  await Promise.all(inputFilesPaths.map((inputFilePath) => runner.run(1, async () => {
-  // for (const inputFilePath of inputFilesPaths) {
+  await Promise.all(inputFilesPaths.map((inputFilePath, i) => runner.run(1, async () => {
+    // for (const inputFilePath of inputFilesPaths) {
     const outputFilePath = getOutputFilePath(inputFilePath)
 
     if (fse.existsSync(outputFilePath)) {
@@ -243,14 +301,15 @@ export async function trimAudioFiles(
     }
 
     try {
-      await trimAudioFile(
+      await trimAudioFile({
         useWorker,
         ffmpegTransform,
         audioClient,
-        {
-          inputFilePath,
-          outputFilePath,
-        })
+        inputFilePath,
+        outputFilePath,
+        priority: priorityCreate(i, priority),
+        abortSignal,
+      })
       // console.log('OK: ' + outputFilePath)
     }
     catch (err) {
@@ -263,31 +322,38 @@ export async function trimAudioFiles(
   console.log('Completed!')
 }
 
-export function trimAudioFilesFromDir(
+export function trimAudioFilesFromDir({
+  useWorker,
+  ffmpegTransform,
+  audioClient,
+  runner,
+  inputDir,
+  inputFilesRelativeGlobs,
+  outputDir,
+  priority,
+  abortSignal,
+}: {
   useWorker: boolean,
   ffmpegTransform: FFmpegTransform,
   audioClient: IAudioClient,
   runner: IPoolRunner,
-  {
-    inputDir,
-    inputFilesRelativeGlobs,
-    outputDir,
-  }: {
-    inputDir: string,
-    inputFilesRelativeGlobs: string[],
-    outputDir: string,
-  },
-) {
-  return trimAudioFiles(
+  inputDir: string,
+  inputFilesRelativeGlobs: string[],
+  outputDir: string,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
+}) {
+  return trimAudioFiles({
     useWorker,
     ffmpegTransform,
     audioClient,
     runner,
-    {
-      inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
-      getOutputFilePath(filePath) {
-        return path.resolve(outputDir, path.relative(inputDir, filePath))
-          .replace(/\.\w+$/, '') + '.mp3'
-      },
-    })
+    inputFilesGlobs: inputFilesRelativeGlobs.map(o => path.resolve(inputDir, o)),
+    getOutputFilePath(filePath) {
+      return path.resolve(outputDir, path.relative(inputDir, filePath))
+        .replace(/\.\w+$/, '') + '.mp3'
+    },
+    priority,
+    abortSignal,
+  })
 }

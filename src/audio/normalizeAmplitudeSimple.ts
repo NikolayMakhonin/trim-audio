@@ -1,6 +1,7 @@
 import {correctSample, EPSILON, generateIndexArray} from './helpers'
 import type {WorkerData, WorkerFunctionServerResultSync} from '@flemist/worker-server'
 import type {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {Priority} from '@flemist/priority-queue'
 
 function getMaxAmplitude({
   samplesData,
@@ -101,6 +102,8 @@ export type NormalizeAmplitudeSimpleArgs = {
   channels?: number[],
   separateChannels?: boolean,
   coef: number,
+  priority?: Priority,
+  abortSignal?: IAbortSignalFast,
 }
 
 export function normalizeAmplitudeSimple(

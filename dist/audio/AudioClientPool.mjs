@@ -20,49 +20,49 @@ class AudioClientPool extends WorkerClientPool {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.normalizeAmplitudeSimple(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     normalizeAmplitudeWithWindow(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.normalizeAmplitudeWithWindow(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     normalizeOffsetSimple(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.normalizeOffsetSimple(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     normalizeOffsetWithWindow(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.normalizeOffsetWithWindow(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     smoothAudio(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.smoothAudio(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     searchContent(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.searchContent(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
     trimAudio(args) {
         return __awaiter(this, void 0, void 0, function* () {
             return this.use(1, ([client]) => {
                 return client.trimAudio(args);
-            });
+            }, args.priority, args.abortSignal);
         });
     }
 }
