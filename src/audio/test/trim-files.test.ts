@@ -67,9 +67,9 @@ describe('audio > test > trim-files', function () {
     // })
   })
 
-  xit('files', async function () {
+  it('files', async function () {
     await trimAudioFilesFromDir({
-      useWorker              : false,
+      useWorker              : true,
       ffmpegTransform,
       audioClient,
       runner                 : new PoolRunner(new Pool(threadsPool.maxSize * 5)),

@@ -1,8 +1,9 @@
 import path from 'path'
 import fse from 'fs-extra'
+import {assetsPath} from './paths.cjs'
 
 export function getAssetPath(assetFileName: string) {
-  const filePath = path.resolve(__dirname, 'assets', assetFileName)
+  const filePath = path.resolve(assetsPath, assetFileName)
   return filePath
 }
 
