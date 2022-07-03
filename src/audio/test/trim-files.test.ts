@@ -6,7 +6,7 @@ import {FFmpegTransformClientPool, getFFmpegTransform} from '@flemist/ffmpeg-enc
 import {Pool, PoolRunner, Pools} from '@flemist/time-limits'
 import {AudioClientPool} from 'src/audio/AudioClientPool'
 
-const threadsPool = new Pool(10)
+const threadsPool = new Pool(7)
 
 export const ffmpegTransformClient = new FFmpegTransformClientPool(
   {
