@@ -7,7 +7,7 @@ import {
   IWorkerClient,
 } from '@flemist/worker-server'
 import {NormalizeAmplitudeSimpleArgs} from 'src/audio/normalizeAmplitudeSimple'
-import {SearchContentArgs, SearchContentResult, TrimAudioArgs} from 'src/audio/trimAudio'
+import {SearchContentArgs, SearchContentResult, TrimAudioArgs, TrimAudioResult} from 'src/audio/trimAudio'
 import {SmoothAudioArgs} from 'src/audio/smoothAudio'
 import {NormalizeOffsetWithWindowArgs} from 'src/audio/normalizeOffsetWithWindow'
 import {NormalizeOffsetSimpleArgs} from 'src/audio/normalizeOffsetSimple'
@@ -23,7 +23,7 @@ export interface IAudioClient extends IWorkerClient {
   normalizeOffsetWithWindow(args: NormalizeOffsetWithWindowArgs): Promise<WorkerData<Float32Array>>;
   smoothAudio(args: SmoothAudioArgs): Promise<WorkerData<Float32Array>>;
   searchContent(args: SearchContentArgs): Promise<WorkerData<SearchContentResult>>;
-  trimAudio(args: TrimAudioArgs): Promise<WorkerData<Float32Array>>;
+  trimAudio(args: TrimAudioArgs): Promise<WorkerData<TrimAudioResult>>;
 }
 
 export class AudioClient extends WorkerClient<TAudioClientOptions> implements IAudioClient {
@@ -33,7 +33,7 @@ export class AudioClient extends WorkerClient<TAudioClientOptions> implements IA
   private _normalizeOffsetWithWindow: WorkerFunctionClient<NormalizeOffsetWithWindowArgs, Float32Array, void>
   private _smoothAudio: WorkerFunctionClient<SmoothAudioArgs, Float32Array, void>
   private _searchContent: WorkerFunctionClient<SearchContentArgs, SearchContentResult, void>
-  private _trimAudio: WorkerFunctionClient<TrimAudioArgs, Float32Array, void>
+  private _trimAudio: WorkerFunctionClient<TrimAudioArgs, TrimAudioResult, void>
 
   constructor({
     preInit,
@@ -134,7 +134,7 @@ export class AudioClient extends WorkerClient<TAudioClientOptions> implements IA
     return result
   }
 
-  async trimAudio(args: TrimAudioArgs): Promise<WorkerData<Float32Array>> {
+  async trimAudio(args: TrimAudioArgs): Promise<WorkerData<TrimAudioResult>> {
     await this.init()
     const result = await this._trimAudio({
       data        : args,

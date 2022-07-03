@@ -10,7 +10,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
   this.timeout(30000)
 
   after(async () => {
-    audioClient.terminate()
+    await audioClient.terminate()
   })
 
   const testVariants = createTestVariants(({
@@ -30,7 +30,7 @@ describe('audio > normalizeOffsetWithWindow', function () {
 		patternsActual: SamplesPattern[][],
 		patternsExpect: SamplesPattern[][],
 	}) => {
-    testSamplesWithPatterns({
+    return testSamplesWithPatterns({
       maxDiff: 1e-7,
       actual : {
         samplesCount,
