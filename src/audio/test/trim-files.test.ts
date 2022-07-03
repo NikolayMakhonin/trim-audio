@@ -59,7 +59,9 @@ describe('audio > test > trim-files', function () {
         outputFilePath: getTempFilePath('vi_ten.mp3'),
       },
     )
+
     console.log('SUCCESS')
+
     // await trimAudioFile({
     // 	inputFilePath : getAssetPath('word.mp3'),
     // 	outputFilePath: getTempFilePath('word.mp3'),
@@ -74,7 +76,7 @@ describe('audio > test > trim-files', function () {
     // })
   })
 
-  xit('files', async function () {
+  it('files', async function () {
     await trimAudioFilesFromDir(
       ffmpegTransform,
       audioClient,

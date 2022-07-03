@@ -83,6 +83,12 @@ export async function trimAudioFile(
 
   const samples = await readAudioFile(ffmpegTransform, inputFilePath)
 
+  // const samples: AudioSamples = {
+  //   data      : new Float32Array(44100),
+  //   channels  : 2,
+  //   sampleRate: 44100,
+  // }
+
   const dir = path.dirname(outputFilePath)
   if (!fse.existsSync(dir)) {
     await fse.mkdirp(dir)
@@ -91,22 +97,22 @@ export async function trimAudioFile(
     await fse.unlink(outputFilePath)
   }
 
-  audioClient.normalizeOffsetWithWindow({
+  samples.data = (await audioClient.normalizeOffsetWithWindow({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     windowSamples: Math.round(samples.sampleRate / 30), // 15 Hz
-  })
+  })).data
 
   const normalizeCoef = 0.95
 
-  audioClient.normalizeAmplitudeSimple({
+  samples.data = (await audioClient.normalizeAmplitudeSimple({
     samplesData     : samples.data,
     channelsCount   : samples.channels,
     coef            : normalizeCoef,
     separateChannels: true,
-  })
+  })).data
 
-  audioClient.trimAudio({
+  samples.data = (await audioClient.trimAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     start        : {
@@ -123,36 +129,30 @@ export async function trimAudioFile(
       minContentDispersion: normalizeCoef * normalizeCoef * decibelToDispersion(END_DECIBEL_DEFAULT),
       space               : Math.round(samples.sampleRate * END_SPACE_DEFAULT / 1000),
     },
-  })
+  })).data.result
 
-  // audioClient.normalizeAmplitudeSimple({
+  // samples.data = (await audioClient.normalizeAmplitudeSimple({
   //   samplesData     : samples.data,
   //   channelsCount   : samples.channels,
   //   coef            : 0.9,
   //   separateChannels: true,
-  // })
+  // })).data
 
-  // audioClient.normalizeAmplitudeWithWindow({
+  // samples.data = (await audioClient.normalizeAmplitudeWithWindow({
   //   samplesData     : samples.data,
   //   channelsCount   : samples.channels,
   //   coef            : 0.9,
   //   maxMult         : 3,
   //   windowSamples   : Math.round(samples.sampleRate * 0.1),
   //   separateChannels: true,
-  // })
+  // })).data
 
-  // const samples: AudioSamples = {
-  //   data      : new Float32Array(44100),
-  //   channels  : 2,
-  //   sampleRate: 44100,
-  // }
-
-  audioClient.smoothAudio({
+  samples.data = (await audioClient.smoothAudio({
     samplesData  : samples.data,
     channelsCount: samples.channels,
     startSamples : samples.sampleRate * 20 / 1000,
     endSamples   : samples.sampleRate * 50 / 1000,
-  })
+  })).data
 
   await saveToMp3File(
     ffmpegTransform,
