@@ -27,14 +27,6 @@ export const audioClient = new AudioClientPool(
   {
     threadsPool,
     preInit: false,
-    options: {
-      preload : false,
-      loglevel: 'warning',
-      // log     : false,
-      // logger({data: {threadId, type, message}}) {
-      // 	console.log(`[${threadId}] [${type}] ${message}`)
-      // },
-    },
   },
 )
 
@@ -52,6 +44,7 @@ describe('audio > test > trim-files', function () {
 
   it('file', async function () {
     await trimAudioFile(
+      false,
       ffmpegTransform,
       audioClient,
       {
@@ -78,6 +71,7 @@ describe('audio > test > trim-files', function () {
 
   it('files', async function () {
     await trimAudioFilesFromDir(
+      false,
       ffmpegTransform,
       audioClient,
       new PoolRunner(new Pool(threadsPool.maxSize * 2)),

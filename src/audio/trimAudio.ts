@@ -234,6 +234,8 @@ export const trimAudioWorker = function trimAudio(
       samplesData: data.data.samplesData,
       result,
     },
-    transferList: [data.data.samplesData.buffer],
+    transferList: result.buffer !== data.data.samplesData.buffer
+      ? [result.buffer, data.data.samplesData.buffer]
+      : [result.buffer],
   }
 }
