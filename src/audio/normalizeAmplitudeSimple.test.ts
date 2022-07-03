@@ -11,7 +11,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
   this.timeout(30000)
 
   after(async () => {
-    audioClient.terminate()
+    await audioClient.terminate()
   })
 
   const testVariants = createTestVariants(({
@@ -33,7 +33,7 @@ describe('audio > normalizeAmplitudeSimple', function () {
 		coef: number,
 		separateChannels: boolean,
 	}) => {
-    testSamplesWithPatterns({
+    return testSamplesWithPatterns({
       maxDiff: 1e-7,
       actual : {
         samplesCount,
@@ -68,15 +68,12 @@ describe('audio > normalizeAmplitudeSimple', function () {
   it('silence 0', async function () {
     await testVariants({
       useWorker    : [false, true],
-      x: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      // z: [0, 0,],
       samplesCount : [100],
       channelsCount: [1, 2, 3],
       channels     : ({channelsCount}) => channelsCount === 1 ? [[0]]
         : channelsCount === 2 ? [[0, 1]]
           : [[0, 2], [1, 2], [0, 1, 2]],
-      coef            : [0, 1],
+      coef            : [0, 0.6, 1],
       separateChannels: [false, true],
       amplitude       : [0, 1, 0.5, -1, -0.25],
       patternsActual  : ({channelsCount, channels, amplitude}) => [

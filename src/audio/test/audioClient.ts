@@ -1,5 +1,5 @@
-import {AudioClientPool} from "src/audio/AudioClientPool";
-import {Pool} from "@flemist/time-limits";
+import {AudioClientPool} from 'src/audio/AudioClientPool'
+import {Pool} from '@flemist/time-limits'
 
 export const audioClient = new AudioClientPool(
   {
