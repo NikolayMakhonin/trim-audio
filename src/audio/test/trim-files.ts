@@ -169,9 +169,10 @@ export async function trimAudioFiles(
     inputFilesGlobs,
     getOutputFilePath,
   }: {
-  inputFilesGlobs: string[],
-  getOutputFilePath: (inputFilePath: string) => string,
-}) {
+    inputFilesGlobs: string[],
+    getOutputFilePath: (inputFilePath: string) => string,
+  },
+) {
   const inputFilesPaths = await globby(inputFilesGlobs.map(o => o.replace(/\\/g, '/')))
   if (inputFilesPaths.length === 0) {
     throw new Error(`There is no files:\r\n${inputFilesGlobs.join('\r\n')}`)
@@ -216,10 +217,11 @@ export function trimAudioFilesFromDir(
     inputFilesRelativeGlobs,
     outputDir,
   }: {
-  inputDir: string,
-  inputFilesRelativeGlobs: string[],
-  outputDir: string,
-}) {
+    inputDir: string,
+    inputFilesRelativeGlobs: string[],
+    outputDir: string,
+  },
+) {
   return trimAudioFiles(
     ffmpegTransform,
     audioClient,

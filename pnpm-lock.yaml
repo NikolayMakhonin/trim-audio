@@ -4,12 +4,13 @@ specifiers:
   '@flemist/abort-controller-fast': ^0.0.5
   '@flemist/async-utils': ^0.0.11
   '@flemist/copy-glob-flat': 0.0.5
-  '@flemist/ffmpeg-encode-decode': ^0.0.12
+  '@flemist/ffmpeg-encode-decode': ^0.0.14
   '@flemist/ffmpeg.wasm-core-st': ^0.10.2
+  '@flemist/priority-queue': ^0.0.8
   '@flemist/test-utils': 0.0.9
   '@flemist/test-variants': 0.0.16
-  '@flemist/time-limits': ^0.0.2
-  '@flemist/worker-server': ^0.0.8
+  '@flemist/time-limits': ^0.0.4
+  '@flemist/worker-server': ^0.0.11
   '@rollup/plugin-alias': 3.1.9
   '@rollup/plugin-commonjs': '=21.1.0'
   '@rollup/plugin-json': 4.1.0
@@ -46,10 +47,11 @@ specifiers:
 
 dependencies:
   '@flemist/abort-controller-fast': 0.0.5
-  '@flemist/ffmpeg-encode-decode': 0.0.12
+  '@flemist/ffmpeg-encode-decode': 0.0.14
   '@flemist/ffmpeg.wasm-core-st': 0.10.2
-  '@flemist/time-limits': 0.0.2
-  '@flemist/worker-server': 0.0.8
+  '@flemist/priority-queue': 0.0.8
+  '@flemist/time-limits': 0.0.4
+  '@flemist/worker-server': 0.0.11
   '@stdlib/math-base-special-erfcinv': 0.0.6
   '@stdlib/math-base-special-erfinv': 0.0.6
   tslib: 2.4.0
@@ -322,24 +324,6 @@ packages:
     dependencies:
       tslib: 2.4.0
 
-  /@flemist/async-utils/0.0.1:
-    resolution: {integrity: sha512-TlsQZj0bvaqNk/RW3kFwhfQk3VjMyaTIvFVRhgx+WdbNrMUzvZMVJJ183I5P74VqgtacNjZ03fjPZAZlk0xMmw==}
-    engines: {node: '>=10.4.0', pnpm: ^7.1.6}
-    dependencies:
-      '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/time-controller': 0.0.1
-      tslib: 2.4.0
-    dev: false
-
-  /@flemist/async-utils/0.0.10:
-    resolution: {integrity: sha512-GSAIwpUsIDSojR0Y2iDocIFOKPYK5SMBR8zD18o51EFxrWyd5J+mCyYalWFfLY1pOFXqZ3BiSZBDPrjY2P6K3w==}
-    engines: {node: '>=10.4.0', pnpm: ^7.1.6}
-    dependencies:
-      '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/time-controller': 0.0.1
-      tslib: 2.4.0
-    dev: false
-
   /@flemist/async-utils/0.0.11:
     resolution: {integrity: sha512-XuHqpW9Z4teIM/aWWYZPZVLtS0DOOqhrTV/6DUcglSE2fZUfbyImdljRYq73ovwAwUy6ZmARFh25C+CoOf5UPw==}
     engines: {node: '>=10.4.0', pnpm: ^7.1.6}
@@ -347,7 +331,6 @@ packages:
       '@flemist/abort-controller-fast': 0.0.5
       '@flemist/time-controller': 0.0.1
       tslib: 2.4.0
-    dev: true
 
   /@flemist/copy-glob-flat/0.0.5:
     resolution: {integrity: sha512-nw2x3zS78uRv7jlR709oXiMXhtTlTS2+WJiy3aTabcayv50CNHMKXevv9WR7YjUJzS7743EdPJl5wAKjIq9Fdg==}
@@ -356,15 +339,14 @@ packages:
       tslib: 2.4.0
     dev: true
 
-  /@flemist/ffmpeg-encode-decode/0.0.12:
-    resolution: {integrity: sha512-Qhm8dK/LbBJWwftmXu2yQSfWi1xbKtLITdfx4wFGoDIEWgK7puBt3or2PF5/4GsNlRK2VZUpnPhNS1uizDp8TA==}
+  /@flemist/ffmpeg-encode-decode/0.0.14:
+    resolution: {integrity: sha512-1ZOJ6EMnpalKs2GSXwQ/9WtEwm/1xz0UZj+cFW7vjmZK4t9qeAMWwd8gdlisuche8TOSO0vwimLxt/1Mmej9lA==}
     engines: {node: '>=14.17.6', pnpm: ^7.1.6}
     dependencies:
       '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/async-utils': 0.0.10
       '@flemist/ffmpeg.wasm-st': 0.10.1
-      '@flemist/time-limits': 0.0.2
-      '@flemist/worker-server': 0.0.8
+      '@flemist/time-limits': 0.0.4
+      '@flemist/worker-server': 0.0.11
       tslib: 2.4.0
     optionalDependencies:
       '@flemist/ffmpeg.wasm-core-st': 0.10.2
@@ -401,12 +383,12 @@ packages:
       tslib: 2.4.0
     dev: false
 
-  /@flemist/priority-queue/0.0.5:
-    resolution: {integrity: sha512-r5+iNh4cDVaHUCN0JefHKlSUQY6BWJt02IjEmXXVwv9ZSHapep2zi0hbg+OFlnXIco8Ry0iLFI+clgeIuvEMJA==}
+  /@flemist/priority-queue/0.0.8:
+    resolution: {integrity: sha512-8SOI25jDF1bpvsRiwStwv5jr2Ycl0kd0x83fBGEtxqsZ2q3u2DagZ6sBzNVOwkL+iX17iBe2uoDWn1HzmMWCdg==}
     engines: {node: '>=10.4.0', pnpm: ^7.1.6}
     dependencies:
       '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/async-utils': 0.0.1
+      '@flemist/async-utils': 0.0.11
       '@flemist/pairing-heap': 0.0.7
       '@flemist/time-controller': 0.0.1
       tslib: 2.4.0
@@ -435,25 +417,24 @@ packages:
       '@flemist/pairing-heap': 0.0.1
       tslib: 2.4.0
 
-  /@flemist/time-limits/0.0.2:
-    resolution: {integrity: sha512-9AU5PYU5OCUCQJAzVWSQKcmF/xZT3LqDjbzUAYBgVD0vfxOCpfFzZDioDprdlljEj24QL8arnZksNf2kXXB6JQ==}
+  /@flemist/time-limits/0.0.4:
+    resolution: {integrity: sha512-nw4PabWWWvKtav3/PMkTM9SW9DPdiRb16rQTui/XuSersKaB/mBCMdrR2Hpnhy8dQEy5wVwnlSpoopY6dVE8eg==}
     engines: {node: '>=10.4.0', pnpm: ^7.1.6}
     dependencies:
       '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/async-utils': 0.0.10
-      '@flemist/priority-queue': 0.0.5
+      '@flemist/async-utils': 0.0.11
+      '@flemist/priority-queue': 0.0.8
       '@flemist/time-controller': 0.0.1
       tslib: 2.4.0
     dev: false
 
-  /@flemist/worker-server/0.0.8:
-    resolution: {integrity: sha512-f7zaAbZ/9MrxvbijRFSlVEctCPdFRk+soPiv6HK3ljFxIwPVM6LEfiFWhIBy7+iDefIaGEbAqaK3Vk0iu3rIzw==}
+  /@flemist/worker-server/0.0.11:
+    resolution: {integrity: sha512-g+xesI5pe0YhXuwuDYdQq4C86ejteSuP4Ub/D1a+xXTP3+nfIFksPFWv+p6tT+6Bu2jJpNgiz49b/8vJEbu/Ug==}
     engines: {node: '>=12.11.0', pnpm: ^7.1.6}
     dependencies:
       '@flemist/abort-controller-fast': 0.0.5
-      '@flemist/async-utils': 0.0.10
-      '@flemist/priority-queue': 0.0.5
-      '@flemist/time-limits': 0.0.2
+      '@flemist/async-utils': 0.0.11
+      '@flemist/time-limits': 0.0.4
       tslib: 2.4.0
     dev: false
 
